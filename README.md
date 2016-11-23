@@ -1,3 +1,3 @@
 # DECO
 
-Our (hopefully) fast implementation of DECO algorithm!
+(Hopefully) fast implementation of DECO algorithm!
