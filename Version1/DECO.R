@@ -65,7 +65,8 @@ DECO_LASSO<-function(Y, X, p, n, m, lambda, r){
     SVD_Object<-svd(XX_Inverse); rm(XX_Inverse) #save memory  #~PARALLEL~#
         #use SVD and the fact that (X'X + rI) is symmetric (U=V) to get (X'X + rI)^(-0.5).
         #Operation here is equivalent to sqrt(p)*(SVD_Object$u%*%diag(SVD_Object$d)) but faster
-    XX_Inverse_Sqrt<-sqrt(p)*t(t(SVD_Object$u)*sqrt(SVD_Object$d)); rm(SVD_Object);gc() 
+    XX_Inverse_Sqrt<-sqrt(p)*t(t(SVD_Object$u)*sqrt(SVD_Object$d))
+    XX_Inverse_Sqrt<-XX_Inverse_Sqrt%*%t(SVD_Object$u); rm(SVD_Object);gc() 
      
     #**   STEP 2.4 Compute Y* and X*(i) for each i    **#
     Y<-XX_Inverse_Sqrt%*%Y
