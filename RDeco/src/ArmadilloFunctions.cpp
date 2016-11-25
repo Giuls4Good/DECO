@@ -5,7 +5,7 @@ using namespace Rcpp;
 //'
 //' @param M a symmetric matrix
 //' @return A matrix C which is the square root of M (i.e. C*C=M)
-//' @details TO compute the square root of the matrix, sqrtmat_sympd function of Armadillo library is used.
+//' @details To compute the square root of the matrix, sqrtmat_sympd function of Armadillo library is used.
 //' @note This function is about 100 times faster than R function sqrtm (contained in expm package)
 //' Note that no check is done to test if the matrix M is actually symmetric.
 // [[Rcpp::depends(RcppArmadillo)]]

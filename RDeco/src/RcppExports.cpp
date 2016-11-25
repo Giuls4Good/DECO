@@ -73,3 +73,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// DECO_LASSO_C
+arma::mat DECO_LASSO_C(arma::vec Y, arma::mat X, int p, int n, float lambda, float r, int ncores, bool intercept);
+RcppExport SEXP RDeco_DECO_LASSO_C(SEXP YSEXP, SEXP XSEXP, SEXP pSEXP, SEXP nSEXP, SEXP lambdaSEXP, SEXP rSEXP, SEXP ncoresSEXP, SEXP interceptSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< float >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< float >::type r(rSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    Rcpp::traits::input_parameter< bool >::type intercept(interceptSEXP);
+    rcpp_result_gen = Rcpp::wrap(DECO_LASSO_C(Y, X, p, n, lambda, r, ncores, intercept));
+    return rcpp_result_gen;
+END_RCPP
+}

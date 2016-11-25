@@ -73,9 +73,6 @@ DECO_LASSO<-function(Y, X, p, n, m, lambda, r, ncores=1, intercept=TRUE){
   XX_Inverse_Sqrt <- sqrt(p)*squareRootSymmetric(XX_Inverse)
 
   #**   STEP 2.4 Compute Y* and X*(i) for each i    **#
-  if(intercept) {
-    Y_old <- Y #Save Y to compute intercept
-  }
   Y<-XX_Inverse_Sqrt%*%Y
   Xi_new<-mclapply(1:m,
                 function(i){
