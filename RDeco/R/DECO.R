@@ -65,8 +65,8 @@ DECO_LASSO<-function(Y, X, p, n, m, lambda, r, ncores=1, intercept=TRUE){
 
   #**   STEP 2.2 Compute X'X from X(i)'X(i)         **#
   XX<-Reduce( '+', XiXi_list); rm(XiXi_list);gc() #save memory #~PARALLEL~ (NOT REALLY: since sum is a pretty
-    #cheap operation, paralellizing and copy all the matrixes can take more time.
-    #See: https://stackoverflow.com/questions/39360438/parallel-summation-of-matrices-or-rasters-in-r)
+  #cheap operation, paralellizing and copy all the matrixes can take more time.
+  #See: https://stackoverflow.com/questions/39360438/parallel-summation-of-matrices-or-rasters-in-r)
 
   #**   STEP 2.3 Use SVD to get (X'X = rI)^{-0.5}   **#
   XX_Inverse <- invSymmMatrix(XX + r*diag(n)); rm(XX);gc()
@@ -75,9 +75,9 @@ DECO_LASSO<-function(Y, X, p, n, m, lambda, r, ncores=1, intercept=TRUE){
   #**   STEP 2.4 Compute Y* and X*(i) for each i    **#
   Y<-XX_Inverse_Sqrt%*%Y
   Xi_new<-mclapply(1:m,
-                function(i){
-                  return(XX_Inverse_Sqrt%*%(Xi[[i]]))   #Compute XX_Inverse_Sqrt%*%Xi for all i
-                }, mc.cores=ncores
+                   function(i){
+                     return(XX_Inverse_Sqrt%*%(Xi[[i]]))   #Compute XX_Inverse_Sqrt%*%Xi for all i
+                   }, mc.cores=ncores
   )
   rm(Xi); gc() #store new Xis in old structure and delete the new Xi2 one
 
@@ -103,8 +103,6 @@ DECO_LASSO<-function(Y, X, p, n, m, lambda, r, ncores=1, intercept=TRUE){
   #**   STEP 4.1 Check if n<=#nonzero coefs and perform LASSO if so **#
 
   #**   STEP 4.2 Run Ridge regression on all non-zero coef vars     **#
-  M = which(beta_hat_k != 0 )
-
 
   return(coefs)
 }
