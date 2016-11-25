@@ -30,8 +30,14 @@
 DECO_LASSO<-function(Y, X, p, n, m, lambda, r, ncores=1, intercept=TRUE){
   #***  STEP 1: INITIALIZATION  ***#
 
+  #**   STEP 1.0 Save given X and Y to compute intercept later on         **#
+  if(intercept) {
+    X_orig  <- X
+    Y_orig  <- Y
+  }
+
   #**   STEP 1.1 Mean Standardization         **#
-  Y <- standardizeVector(as.vector(Y))
+  Y <- as.vector(Y - mean(Y))
   X <- standardizeMatrix(X)
 
   #**   STEP 1.2 Arbitrary Partitioning       **#
@@ -53,7 +59,7 @@ DECO_LASSO<-function(Y, X, p, n, m, lambda, r, ncores=1, intercept=TRUE){
   #**   STEP 2.1 Compute X(i)'X(i) for each i       **#
   XiXi_list<-mclapply(1:m,
                       function(i){
-                        return(mulMatrices(Xi[[i]],tMatrix(Xi[[i]]))) #Compute X(i)X(i)' for all i
+                        return(Xi[[i]]%*%t(Xi[[i]])) #Compute X(i)X(i)' for all i
                       }, mc.cores=ncores
   )
 
@@ -67,10 +73,13 @@ DECO_LASSO<-function(Y, X, p, n, m, lambda, r, ncores=1, intercept=TRUE){
   XX_Inverse_Sqrt <- sqrt(p)*squareRootSymmetric(XX_Inverse)
 
   #**   STEP 2.4 Compute Y* and X*(i) for each i    **#
-  Y <- mulMatrices(XX_Inverse_Sqrt,Y)
+  if(intercept) {
+    Y_old <- Y #Save Y to compute intercept
+  }
+  Y<-XX_Inverse_Sqrt%*%Y
   Xi_new<-mclapply(1:m,
                 function(i){
-                  return(mulMatrices(XX_Inverse_Sqrt,Xi[[i]]))   #Compute XX_Inverse_Sqrt%*%Xi for all i
+                  return(XX_Inverse_Sqrt%*%(Xi[[i]]))   #Compute XX_Inverse_Sqrt%*%Xi for all i
                 }, mc.cores=ncores
   )
   rm(Xi); gc() #store new Xis in old structure and delete the new Xi2 one
@@ -81,14 +90,14 @@ DECO_LASSO<-function(Y, X, p, n, m, lambda, r, ncores=1, intercept=TRUE){
   #**   STEP 3.2 Put together all estimated coefs     **#
   coefs<-unlist(mclapply(1:m,
                          function(i){
-                           myCoefs<-as.vector(coef(glmnet(Xi[[i]], Y, alpha = 1, nlambda = 1, lambda=2*lambda, intercept=FALSE))) #compute without intercept
+                           myCoefs<-as.vector(coef(glmnet(Xi_new[[i]], Y, alpha = 1, nlambda = 1, lambda=2*lambda, intercept=FALSE))) #compute without intercept
                            return(myCoefs[-1]) #no intercept included
                          }, mc.cores=ncores
   ))
 
   #**   STEP 3.3 Compute Intercept from coefs         **#
   if(intercept) {
-    coef0<- mean(Y) - mulMatrices(colMeans(X),coefs)
+    coef0<- mean(Y_orig) - colMeans(X_orig)%*%coefs
     coefs<-c(coef0, coefs)
   }
 
@@ -132,8 +141,13 @@ DECO_LASSO<-function(Y, X, p, n, m, lambda, r, ncores=1, intercept=TRUE){
 DECO_LASSO_R<-function(Y, X, p, n, m, lambda, r, ncores=1){
   #***  STEP 1: INITIALIZATION  ***#
 
+  #**   STEP 1.0 Save given X and Y to compute intercept later on         **#
+  X_orig  <- X
+  Y_orig  <- Y
+
   #**   STEP 1.1 Mean Standardization         **#
-  Y<-as.vector(Y - mean(Y)); X<-(X - colMeans(X))
+  Y<-as.vector(Y - mean(Y));
+  X<-scale(X,scale=FALSE)[,]
 
   #**   STEP 1.2 Arbitrary Partitioning       **#
   #X<-X[,sample.int(p, p, replace=FALSE)]  #In case the columns were sorted in some way relevant for
@@ -170,6 +184,7 @@ DECO_LASSO_R<-function(Y, X, p, n, m, lambda, r, ncores=1){
   XX_Inverse_Sqrt<-sqrt(p)*t(t(SVD_Object$u)*sqrt(SVD_Object$d))
   XX_Inverse_Sqrt<-XX_Inverse_Sqrt%*%t(SVD_Object$u); rm(SVD_Object);gc()
 
+
   #**   STEP 2.4 Compute Y* and X*(i) for each i    **#
   Y<-XX_Inverse_Sqrt%*%Y
   Xi2<-mclapply(1:m,
@@ -190,8 +205,8 @@ DECO_LASSO_R<-function(Y, X, p, n, m, lambda, r, ncores=1){
                          }, mc.cores=ncores
   ))
 
-  #**   STEP 3.3 Compute Intercept from coefs         **#
-  coef0<- mean(Y) - colMeans(X)%*%coefs
+  #**   STEP 3.3 Insert Intercept into coefs         **#
+  coef0<- mean(Y_orig) - colMeans(X_orig)%*%coefs
   coefs<-c(coef0, coefs)
 
   #***  STEP 4: REFINEMENT      ***#

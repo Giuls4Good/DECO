@@ -1,7 +1,7 @@
 library(rbenchmark)
 #test data
-n<-100
-p<-500
+n<-5
+p<-10
 m<-1
 sigma<-1
 lambda<-0.03
@@ -20,4 +20,4 @@ res<-DECO_LASSO_R(Y, X, p, n, m, lambda, r, ncores = 8)
 res_C<-DECO_LASSO(Y, X, p, n, m, lambda, r, ncores = 8)
 
 #Benchmark
-benchmark(DECO_LASSO_R(Y, X, p, n, m, lambda, r), DECO_LASSO_R(Y, X, p, n, m, lambda, r, ncores = 8))
+benchmark(DECO_LASSO_R(Y, X, p, n, m, lambda, r, ncores = 8), DECO_LASSO(Y, X, p, n, m, lambda, r, ncores = 8)) #1.3x faster

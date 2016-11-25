@@ -6,6 +6,7 @@ using namespace Rcpp;
 //' @param M a symmetric matrix
 //' @return A matrix C which is the square root of M (i.e. C*C=M)
 //' @details TO compute the square root of the matrix, sqrtmat_sympd function of Armadillo library is used.
+//' @note This function is about 100 times faster than R function sqrtm (contained in expm package)
 //' Note that no check is done to test if the matrix M is actually symmetric.
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
@@ -33,7 +34,11 @@ arma::vec standardizeVector(arma::vec V) {
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 arma::mat standardizeMatrix(arma::mat M) {
-  Rcpp::stop("Sorry still not implemented :(");
+  arma::mat mean_col = mean(M,0);
+  for(size_t j=0; j<M.n_cols; j++) {
+    M.col(j) -= mean_col(j);
+  }
+  return(M);
 }
 
 //' Transpose of a matrix
