@@ -1,8 +1,6 @@
-#Implementation of DECO using C/C++/R (for a fixed lambda and without refinement step)
-
 #' DECO Parallelized Algorithm
 #'
-#' This implementation uses C/C++ functions to speed up computation.  Refinement step is missing, lambda is fixed.
+#' This implementation uses only R functions. Refinement step is missing, lambda is fixed.
 #'
 #' @param Y gives the nx1 vector of observations we wish to approximate with a linear model of type Y = Xb + e
 #' @param X gives the nxp matrix of regressors, each column corresponding to a different regressor
@@ -27,22 +25,21 @@
 #'       data
 #'       -We cannot disturb variable order within the algorithm for output comparison reasons, thus reorder X columns before
 #'       running DECO_LASSO (if important)
-DECO_LASSO<-function(Y, X, p, n, m, lambda, r, ncores=1, intercept=TRUE){
+DECO_LASSO_R<-function(Y, X, p, n, m, lambda, r, ncores=1){
   #***  STEP 1: INITIALIZATION  ***#
 
   #**   STEP 1.0 Save given X and Y to compute intercept later on         **#
-  if(intercept) {
-    X_orig  <- X
-    Y_orig  <- Y
-  }
+  X_orig  <- X
+  Y_orig  <- Y
 
   #**   STEP 1.1 Mean Standardization         **#
-  Y <- as.vector(Y - mean(Y))
-  X <- standardizeMatrix(X)
+  Y<-as.vector(Y - mean(Y));
+  X<-scale(X,scale=FALSE)[,]
 
   #**   STEP 1.2 Arbitrary Partitioning       **#
-
-  #Not really sure if C could bring some improvement here
+  #X<-X[,sample.int(p, p, replace=FALSE)]  #In case the columns were sorted in some way relevant for
+  #predictive power/correlation, randomly disturb the sorting
+  #DO NOT USE THIS
   Xi<-mclapply(1:m,
                function(i){
                  startGroup<-as.integer(round((p/m)*(i-1))) + 1  #start one position advanced to last endGroup computed
@@ -59,30 +56,30 @@ DECO_LASSO<-function(Y, X, p, n, m, lambda, r, ncores=1, intercept=TRUE){
   #**   STEP 2.1 Compute X(i)'X(i) for each i       **#
   XiXi_list<-mclapply(1:m,
                       function(i){
-                        return(Xi[[i]]%*%t(Xi[[i]])) #Compute X(i)X(i)' for all i
+                        return(Xi[[i]]%*%t(Xi[[i]]))        #Compute X(i)X(i)' for all i
                       }, mc.cores=ncores
   )
 
   #**   STEP 2.2 Compute X'X from X(i)'X(i)         **#
-  XX<-Reduce( '+', XiXi_list); rm(XiXi_list);gc() #save memory #~PARALLEL~ (NOT REALLY: since sum is a pretty
-    #cheap operation, paralellizing and copy all the matrixes can take more time.
-    #See: https://stackoverflow.com/questions/39360438/parallel-summation-of-matrices-or-rasters-in-r)
+  XX<-Reduce( '+', XiXi_list); rm(XiXi_list);gc() #save memory #~PARALLEL~#
 
   #**   STEP 2.3 Use SVD to get (X'X = rI)^{-0.5}   **#
-  XX_Inverse <- invSymmMatrix(XX + r*diag(n)); rm(XX);gc()
-  XX_Inverse_Sqrt <- sqrt(p)*squareRootSymmetric(XX_Inverse)
+  XX_Inverse<-solve(XX + r*diag(n)); rm(XX);gc() #obtain the inverse (X'X + rI)^(-1) and save memory
+  SVD_Object<-svd(XX_Inverse); rm(XX_Inverse) #save memory  #~PARALLEL~#
+  #use SVD and the fact that (X'X + rI) is symmetric (U=V) to get (X'X + rI)^(-0.5).
+  #Operation here is equivalent to sqrt(p)*(SVD_Object$u%*%diag(SVD_Object$d)) but faster
+  XX_Inverse_Sqrt<-sqrt(p)*t(t(SVD_Object$u)*sqrt(SVD_Object$d))
+  XX_Inverse_Sqrt<-XX_Inverse_Sqrt%*%t(SVD_Object$u); rm(SVD_Object);gc()
+
 
   #**   STEP 2.4 Compute Y* and X*(i) for each i    **#
-  if(intercept) {
-    Y_old <- Y #Save Y to compute intercept
-  }
   Y<-XX_Inverse_Sqrt%*%Y
-  Xi_new<-mclapply(1:m,
+  Xi2<-mclapply(1:m,
                 function(i){
-                  return(XX_Inverse_Sqrt%*%(Xi[[i]]))   #Compute XX_Inverse_Sqrt%*%Xi for all i
+                  return(XX_Inverse_Sqrt%*%(Xi[[i]]))        #Compute XX_Inverse_Sqrt%*%Xi for all i
                 }, mc.cores=ncores
   )
-  rm(Xi); gc() #store new Xis in old structure and delete the new Xi2 one
+  Xi<-Xi2; rm(Xi2); gc() #store new Xis in old structure and delete the new Xi2 one
 
   #***  STEP 3: ESTIMATION      ***#
 
@@ -90,24 +87,20 @@ DECO_LASSO<-function(Y, X, p, n, m, lambda, r, ncores=1, intercept=TRUE){
   #**   STEP 3.2 Put together all estimated coefs     **#
   coefs<-unlist(mclapply(1:m,
                          function(i){
-                           myCoefs<-as.vector(coef(glmnet(Xi_new[[i]], Y, alpha = 1, nlambda = 1, lambda=2*lambda, intercept=FALSE))) #compute without intercept
+                           myCoefs<-as.vector(coef(glmnet(Xi[[i]], Y, alpha = 1, nlambda = 1, lambda=2*lambda, intercept=FALSE))) #compute without intercept
                            return(myCoefs[-1]) #no intercept included
                          }, mc.cores=ncores
   ))
 
-  #**   STEP 3.3 Compute Intercept from coefs         **#
-  if(intercept) {
-    coef0<- mean(Y_orig) - colMeans(X_orig)%*%coefs
-    coefs<-c(coef0, coefs)
-  }
+  #**   STEP 3.3 Insert Intercept into coefs         **#
+  coef0<- mean(Y_orig) - colMeans(X_orig)%*%coefs
+  coefs<-c(coef0, coefs)
 
   #***  STEP 4: REFINEMENT      ***#
 
   #**   STEP 4.1 Check if n<=#nonzero coefs and perform LASSO if so **#
 
   #**   STEP 4.2 Run Ridge regression on all non-zero coef vars     **#
-  M = which(beta_hat_k != 0 )
-
 
   return(coefs)
 }
