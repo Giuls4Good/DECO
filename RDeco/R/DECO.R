@@ -12,6 +12,7 @@
 #' @param lambda gives the (fixed) penalty magnitude in the LASSO fit of the algorithm
 #' @param ncores determines the number of cores used on each machine to parallelize computation
 #' @param r is a tweaking parameter for making the inverse more robust (as we take inverse of XX + r*I)
+#' @param intercept determines whether to include an intercept in the model or not
 #' @author Samuel Davenport, Jack Carter, Giulio Morina, Jeremias Knoblauch
 #' @details The algorithm is based on the description in "DECOrrelated feature space partitioning
 #'          for distributed sparse regression" in Wang, Dunson, and Leng (2016) if lambda is fixed and
