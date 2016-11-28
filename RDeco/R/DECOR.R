@@ -111,14 +111,17 @@ DECO_LASSO_R <- function(Y, X, p, n, m, lambda, r_1, r_2 = r_1, ncores=1, interc
     }
 
     #**   STEP 4.1 Check if n<=#nonzero coefs and perform LASSO if so **#
-
+    M = which(coefs != 0)
+    if(M >= n){
+      coefs[M] <- coef(glmnet(X[, M], Y, nlambda = 1, lambda = c(lambda), intercept = FALSE))[-1]
+    }
     #**   STEP 4.2 Run Ridge regression on all non-zero coef vars     **#
     #Find the indicies of the coefficients that are non-zero
     M = which(coefs != 0);
     #Subset X
-    X_M = X[,M]
+    X_M = X[, M]
     #Apply Ridge Regression to give an updated and hopefully better estimate of the coefficient vector
-    coefs[M] = solve(t(X_M)%*%X_M + r_2*diag(length(M)))%*% t(X_M) %*% Y
+    coefs[M] = solve(t(X_M) %*% X_M + r_2 * diag(length(M))) %*% t(X_M) %*% Y
   }
 
   return(coefs)
