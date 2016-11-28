@@ -1,0 +1,54 @@
+---
+title: "RDeco Package"
+author: Jack Carter, Samuel Davenport, Jeremias Knoblauch, Giulio Morina
+output: pdf_document
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+require(RDeco)
+require(rbenchmark)
+```
+
+## RDeco package
+
+Some coll description should be included here!!
+
+## Speed comparison
+
+```{r data}
+set.seed(17)
+n<-5
+p<-17
+m<-4
+sigma<-1
+lambda<-0.03
+r<-0.01
+set.seed(100)
+X<-matrix(rnorm(n*p, sd=1), nrow=n)
+set.seed(1000)
+eps<-rnorm(n, mean = 0, sd = sigma)
+set.seed(5000)
+activeCoefs<-sample(c(0,1),p, prob=c(0.9, 0.1), replace=TRUE)  ##get coefficients that impact Y
+set.seed(10000)
+coefs<-activeCoefs*1
+Y<-X%*%coefs + eps
+ncores <- 8
+
+for (refinement in c(TRUE,FALSE)) {
+  res<-DECO_LASSO_R(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement)
+  res_mix<-DECO_LASSO_MIX(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement)
+  res_C<-as.vector(t(DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement)))
+  if(all.equal(res,res_mix) == TRUE && all.equal(res,res_C) == TRUE) {
+    print("All functions return the same result!")
+  } else {
+    print("NOT all functions return the same result...")
+  }
+  print(benchmark(DECO_LASSO_R(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement),
+            DECO_LASSO_MIX(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement),
+            DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement),
+            replications = 10, order="relative"))
+}
+
+```
+
+
