@@ -34,7 +34,7 @@
 #'       -We cannot disturb variable order within the algorithm for output comparison reasons, thus reorder X columns before
 #'       running DECO_LASSO (if important)
 #' @export
-DECO_LASSO_R <- function(Y, X, p=NULL, n=NULL, m=1, lambda, r_1, r_2 = r_1, ncores=1, intercept=TRUE, refinement = TRUE){
+DECO_LASSO_R <- function(Y, X, p = NULL, n = NULL, m = 1, lambda, r_1, r_2 = r_1, ncores = 1, intercept = TRUE, refinement = TRUE){
   #***  STEP 1: INITIALIZATION  ***#
 
   # STEP 0 Check if input parameters are compatible and if n,p are given
@@ -59,7 +59,7 @@ DECO_LASSO_R <- function(Y, X, p=NULL, n=NULL, m=1, lambda, r_1, r_2 = r_1, ncor
 
   #**   STEP 1.1 Mean Standardization         **#
   Y <- as.vector(Y - mean(Y));
-  X <- scale(X,scale=FALSE)[,] #Do not divide by standard deviation, just puts mean equal 0
+  X <- scale(X, scale = FALSE)[ , ] #Do not divide by standard deviation, just puts mean equal 0
 
   #**   STEP 1.2 Arbitrary Partitioning       **#
   #X<-X[,sample.int(p, p, replace=FALSE)]  #In case the columns were sorted in some way relevant for
@@ -82,7 +82,7 @@ DECO_LASSO_R <- function(Y, X, p=NULL, n=NULL, m=1, lambda, r_1, r_2 = r_1, ncor
 
   #***  STEP 2: DECORRELATION   ***#
 
-  #**   STEP 2.1 Compute X(i)'X(i) for each i       **#
+  #**   STEP 2.1 Compute X(i)X(i)' for each i       **#
   XiXi_list <- mclapply(1:m,
                       function(i){
                         return(Xi[[i]]%*%t(Xi[[i]]))        #Compute X(i)X(i)' for all i
@@ -90,7 +90,7 @@ DECO_LASSO_R <- function(Y, X, p=NULL, n=NULL, m=1, lambda, r_1, r_2 = r_1, ncor
   )
 
   #**   STEP 2.2 Compute X'X from X(i)'X(i)         **#
-  XX <- Reduce( '+', XiXi_list); rm(XiXi_list); gc() #save memory #~PARALLEL~#
+  XX <- Reduce('+', XiXi_list); rm(XiXi_list); gc() #save memory #~PARALLEL~#
   #**   STEP 2.3 Use SVD to get (X'X = rI)^{-0.5}   **#
   XX_Inverse <- solve(XX + r_1*diag(n)); rm(XX); gc() #obtain the inverse (X'X + rI)^(-1) and save memory
   SVD_Object <- svd(XX_Inverse); rm(XX_Inverse) #save memory  #~PARALLEL~#
@@ -138,11 +138,14 @@ DECO_LASSO_R <- function(Y, X, p=NULL, n=NULL, m=1, lambda, r_1, r_2 = r_1, ncor
     #**   STEP 4.1 Check if n<=#nonzero coefs and perform LASSO if so **#
     M = which(coefs != 0)
     if(length(M) >= n){
-      coefs[M] <- coef(glmnet(X[, M], Y, nlambda = 1, lambda = c(lambda), intercept = FALSE))[-1]
+      coefs[M] <- coef(glmnet(X[, M], Y, alpha = 1, nlambda = 1, lambda = c(2*lambda), intercept = FALSE))[-1]
+      M = which(coefs != 0)
+    }
+    if(length(M) == 0){
+      print("All coefficients estimated as 0")
+      return(rep(0, length(coefs)))
     }
     #**   STEP 4.2 Run Ridge regression on all non-zero coef vars     **#
-    #Find the indicies of the coefficients that are non-zero
-    M = which(coefs != 0);
     #Subset X
     X_M = X[, M]
     #Apply Ridge Regression to give an updated and hopefully better estimate of the coefficient vector
