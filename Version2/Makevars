@@ -1,0 +1,19 @@
+PKG_CFLAGS = -I ~/usr/local/include -march=native -mtune=native -std=c11 -fopenmp
+#This gives the flags you need to compile your C code (when using gcc)
+#It defines the standard library, that you use openmp, ... and so on
+
+PKG_CXXFLAGS=`${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()"` -O3 -std=c++11 -fno-gnu-unique
+#This gives the flags you need to compile your C++ code (when using g++)
+# -e tells the g++ compiler to call R code now, and "Rcpp:::CxxFlags()"" is an R command (which is then called!) that will
+# give you the path of the Rcpp library (that is because Rcpp is NOT a system library, so you need to tell the system its location)
+# the -e can be read as "extern" as in "extern code"
+# the -O3 means some optimization scheme to force the compiler to make your code quick
+# and the -std = c++11 makes sure you get the 2011 standard C++ compilation/assembler language when compiling
+
+PKG_LIBS = `${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()"` -L ~/usr/local/lib -lgsl -lgslcblas $(LAPACK_LIBS) $(BLAS_LIBS) -L/opt/cuda-8.0/lib64
+# this gives the libraries you need to compile (for both C and C++ code)
+# $(LAPACK_LIBS) and $(BLAS_LIBS) (BLAS = Basic Linear Algebra Subroutines) are defined such that each local machine/each R user
+# will automatically use their BLAS/LAPACK distributions when compling/adding the package
+
+all: $(SHLIB)
+
