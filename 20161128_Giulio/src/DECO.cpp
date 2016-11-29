@@ -4,21 +4,36 @@ using namespace Rcpp;
 using namespace arma;
 #include "deco.h" //Put it here, after all the previous stuff!
 
+/*  THIS FUNCTION IS NOT EXPORTED TO R BY RCPP, BUT IT IS USED INTERNALLY
+ *
+ *  This is an auxilary function to call the R function 'lassoCoef' which computes the coefficient of the Lasso
+ *  regression using glmnet package. Input f should therefore be the function lassoCoef.
+ *  Note that the R function returns a NumericVector and this object is thus converted to an Armadillo vector.
+ *
+*/
 arma::vec lassoRCoef(arma::mat& X, arma::vec& Y, double nlambda,
                          double lambda, bool intercept, Function& f) { //The Function f is lassoCoef.
-  NumericVector res = f(X, Y, nlambda, lambda, intercept);
+  NumericVector res = f(X, Y, nlambda, lambda, intercept); //Call R function
   arma::vec res_arm(res.begin(), res.size(), false); //converting numericvector to armadillo by reference (not copying)
   return res_arm;
 }
 
+/*  THIS FUNCTION IS NOT EXPORTED TO R BY RCPP, BUT IT IS USED INTERNALLY
+ *
+ *  This is an auxilary function to call the R function 'lassoCoefParallel' which computes the coefficient of the Lasso
+ *  regression using glmnet package and in a parallel fashion. Input f should therefore be the function lassoCoefParallel.
+ *  Note that the R function returns a NumericVector and this object is thus converted to an Armadillo vector.
+ *  Moreover, X should be an array of matrices that is thus converted to a List so that R can deal with it.
+ *
+ */
 arma::vec lassoRCoefParallel(arma::mat* X, arma::vec& Y, double nlambda,
-                        double lambda, bool intercept, int m, Function& f) {
+                        double lambda, bool intercept, int m, Function& f) { //The Function f is lassoCoefParallel.
   //Convert data Xi to a list so that it can be feed into R
   Rcpp::List data(m);
   for(int i=0; i<m; i++){
     data[i] = X[i];
   }
-  NumericVector res = f(data, Y, nlambda, lambda, intercept, m);
+  NumericVector res = f(data, Y, nlambda, lambda, intercept, m); //Call R function
   arma::vec res_arm(res.begin(), res.size(), false); //converting numericvector to armadillo by reference (not copying)
   return res_arm;
 }

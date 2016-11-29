@@ -17,8 +17,8 @@ Some coll description should be included here!!
 
 ```{r data}
 set.seed(100)
-n<-5
-p<-17
+n<-50
+p<-18
 m<-4
 sigma<-1
 lambda<-0.03
@@ -35,6 +35,7 @@ for (refinement in c(FALSE,TRUE)) {
   res_mix<-DECO_LASSO_MIX(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement)
   res_C<-as.vector(t(DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement)))
   res_C_parallelLasso <- as.vector(t(DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement, parallel_lasso = TRUE)))
+  res_C_gradientdescent <- as.vector(t(DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement, glmnet = FALSE)))
   if(all.equal(res,res_mix) == TRUE && all.equal(res,res_C) == TRUE && all.equal(res_C,res_C_parallelLasso) == TRUE) {
     print("All functions return the same result!")
   } else {

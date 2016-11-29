@@ -112,6 +112,41 @@ invSymmMatrix <- function(M) {
     .Call('RDeco_invSymmMatrix', PACKAGE = 'RDeco', M)
 }
 
+#' TITLE OF THIS FUNCTION
+#'
+#' @param beta gives the arma::vec vector of beta-estimates at the current iteration of Coordinate descent
+#' @param X gives the arma::mat matrix of regressors in this partition of all regressors (there are m partitions
+#'        in total, and we run coordinate descent on each partition)
+#' @param Y gives the arma::vec vector of observations that we project X onto
+#' @param lambda gives the double giving our lambda coefficient
+#' @param n gives an integer corresponding to the number of rows (observations) of X (Y)
+#' @param p gives the integer corresponding to the number of columns/regressors contained in X
+#' @export
+#' @return an updated version of beta
+#'         NEEDS CHANGING:
+#'         - we should compute Xi'Xi once for each i, and then supply it as another parameter?
+#'         - we should be able to just return a pointer to a (changed) beta (more efficient than local copies!)
+update_naive <- function(beta, X, Y, lambda, n, p) {
+    .Call('RDeco_update_naive', PACKAGE = 'RDeco', beta, X, Y, lambda, n, p)
+}
+
+#' TITLE OF THIS FUNCTION
+#'
+#' @param X gives the arma::mat matrix of regressors in this partition of all regressors (there are m partitions
+#'        in total, and we run coordinate descent on each partition)
+#' @param Y gives the arma::vec vector of observations that we project X onto
+#' @param lambda gives the double giving our lambda coefficient
+#' @param precision gives the convergence criterion (how close two subsequent iterations should be before termination)
+#' @param max_iter gives the maximum number of iterations in the inner update loop of coordinate descent
+#' @export
+#' @return an updated version of beta
+#'         NEEDS CHANGING:
+#'         - we should compute Xi'Xi once for each i, and then supply it as another parameter?
+#'         - we should be able to just return a pointer to a (changed) beta (more efficient than local copies!)
+coordinateDescent_naive <- function(X, Y, lambda, precision, max_iter) {
+    .Call('RDeco_coordinateDescent_naive', PACKAGE = 'RDeco', X, Y, lambda, precision, max_iter)
+}
+
 #' DECO Parallelized Algorithm (Pure C)
 #'
 #' This function is deprecated. Use \code{DECO_LASSO_C_PARALLEL} function.
@@ -123,7 +158,46 @@ DECO_LASSO_C <- function(Y, X, p, n, lambda, r, ncores = 1L, intercept = TRUE) {
     .Call('RDeco_DECO_LASSO_C', PACKAGE = 'RDeco', Y, X, p, n, lambda, r, ncores, intercept)
 }
 
-DECO_LASSO_C_PARALLEL <- function(Y, X, p, n, m, lambda, r_1, ncores = 1L, intercept = TRUE, refinement = TRUE, parallel_lasso = FALSE) {
-    .Call('RDeco_DECO_LASSO_C_PARALLEL', PACKAGE = 'RDeco', Y, X, p, n, m, lambda, r_1, ncores, intercept, refinement, parallel_lasso)
+#' DECO Parallelized Algorithm (Pure C++)
+#'
+#' A description goes here
+#'
+#' @param Y gives the nx1 vector of observations we wish to approximate with a linear model of type Y = Xb + e
+#' @param X gives the nxp matrix of regressors, each column corresponding to a different regressor
+#' @param p is the column dimension of X [equivalently, p is the number of regressor variables].
+#' If not given, it is computed as the number of columns of X.
+#' @param n is the row dimension of X (and Y) [equivalently, n is the number of observations/individuals]
+#'  If not given, it is computed as the number of rows of X.
+#' @param m is the number of groups/blocks you wish to split X into, denoted X(i) for 1 <= i <= m
+#' @param lambda gives the (fixed) penalty magnitude in the LASSO fit of the algorithm
+#' @param ncores determines the number of cores used on each machine to parallelize computation
+#' @param r_1 is a tweaking parameter for making the inverse more robust (as we take inverse of XX + r_1*I)
+#' @param r_2 is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I)
+#' @param intercept determines whether to include an intercept in the model or not
+#' @param refinement determines whether to include the refinement step (Stage 3 of the algorithm)
+#' @param parallel_lasso determines whether a parallel version of the Lasso coefficients should be used.
+#' This parameter is ignored when \code{glmnet} is set to \code{FALSE} (see details).
+#' @param glmnet determines whether glmnet function form glmnet R package should be used to compute the Lasso coefficients.
+#' See details for further information. If set to \code{FALSE}, C++ implementation of coordinate descent algorithm is used.
+#' @param precision determines the precision used in the coordinate descent algorithm. It is ignored when
+#' \code{glmnet} is set to \code{TRUE}.
+#' @param max_iter determines the maximum number of iterations used in the coordinate descent algorithm.
+#' It is ignored when \code{glmnet} is set to \code{TRUE}.
+#' @details This function is a pure C++ implementation of \code{DECO_LASSO_R} and \code{DECO_LASSO_MIX} functions.
+#' Due to the fact that it is entirely written in C++ is generally way faster than its counterparts.
+#'
+#' Two functions can be used to compute Lasso coefficients: glmnet R function (\code{glmnet = TRUE})
+#' and coordinate descent algorithm (\code{glmnet = FALSE}). glmnet R function is generally faster, but more memory is
+#' required to pass the input argumentd from C++ to R and back. When \code{parallel_lasso = TRUE} an R parallelized
+#' version of glmnet is used. Note however that for small datasets this could lead to slower run times, due to the
+#' communication between C++ and R.
+#'
+#' Descent coordinate algorithm is always run on a single core.
+#'
+#' @return An estimate of the coefficients b.
+#' @author Samuel Davenport, Jack Carter, Giulio Morina, Jeremias Knoblauch
+#' @export
+DECO_LASSO_C_PARALLEL <- function(Y, X, p, n, m, lambda, r_1, r_2 = 0.01, ncores = 1L, intercept = TRUE, refinement = TRUE, parallel_lasso = FALSE, glmnet = TRUE, precision = 0.0000001, max_iter = 100000L) {
+    .Call('RDeco_DECO_LASSO_C_PARALLEL', PACKAGE = 'RDeco', Y, X, p, n, m, lambda, r_1, r_2, ncores, intercept, refinement, parallel_lasso, glmnet, precision, max_iter)
 }
 
