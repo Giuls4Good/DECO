@@ -107,7 +107,7 @@ arma::vec coordinateDescent_naive(arma::mat X, arma::vec Y, double lambda, doubl
   bool criterion = false;
   int count = 0;
   while(!criterion && count<=max_iter){
-    Rcpp::checkUserInterrupt();                                         //check if User pressed 'Stop'
+    //Rcpp::checkUserInterrupt();                                         //check if User pressed 'Stop'
     beta_update = update_naive(beta, X, Y, lambda, n, p);                 //get updated beta
     criterion =  ( (max(abs(beta_update - beta))) < precision );       //check if your convergence criterion is satisfied
     count++;                                                        //update the loop counter

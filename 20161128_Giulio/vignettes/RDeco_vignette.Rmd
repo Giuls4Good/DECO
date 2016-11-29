@@ -17,18 +17,18 @@ Some coll description should be included here!!
 
 ```{r data}
 set.seed(100)
-n<-50
+n<-500
 p<-18
-m<-4
+m<-1
 sigma<-1
 lambda<-0.03
 r<-0.01
 X<-matrix(rnorm(n*p, sd=1), nrow=n)
 eps<-rnorm(n, mean = 0, sd = sigma)
-activeCoefs<-sample(c(0,1),p, prob=c(0.9, 0.1), replace=TRUE)  ##get coefficients that impact Y
+activeCoefs<-sample(c(0,1),p, prob=c(0.5, 0.1), replace=TRUE)  ##get coefficients that impact Y
 coefs<-activeCoefs*1
 Y<-X%*%coefs + eps
-ncores <- 8
+ncores <- 1
 
 for (refinement in c(FALSE,TRUE)) {
   res<-DECO_LASSO_R(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement)
@@ -45,6 +45,7 @@ for (refinement in c(FALSE,TRUE)) {
             DECO_LASSO_MIX(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement),
             DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement),
             DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement, parallel_lasso = TRUE),
+            DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, ncores = ncores, refinement = refinement, glmnet = FALSE),
             replications = 10, order="relative"))
 
 }
