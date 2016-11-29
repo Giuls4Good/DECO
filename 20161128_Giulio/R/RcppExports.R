@@ -123,7 +123,7 @@ DECO_LASSO_C <- function(Y, X, p, n, lambda, r, ncores = 1L, intercept = TRUE) {
     .Call('RDeco_DECO_LASSO_C', PACKAGE = 'RDeco', Y, X, p, n, lambda, r, ncores, intercept)
 }
 
-DECO_LASSO_C_PARALLEL <- function(Y, X, p, n, m, lambda, r_1, ncores = 1L, intercept = TRUE, refinement = TRUE) {
-    .Call('RDeco_DECO_LASSO_C_PARALLEL', PACKAGE = 'RDeco', Y, X, p, n, m, lambda, r_1, ncores, intercept, refinement)
+DECO_LASSO_C_PARALLEL <- function(Y, X, p, n, m, lambda, r_1, ncores = 1L, intercept = TRUE, refinement = TRUE, parallel_lasso = FALSE) {
+    .Call('RDeco_DECO_LASSO_C_PARALLEL', PACKAGE = 'RDeco', Y, X, p, n, m, lambda, r_1, ncores, intercept, refinement, parallel_lasso)
 }
 

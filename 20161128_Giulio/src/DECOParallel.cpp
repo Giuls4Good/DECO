@@ -13,8 +13,8 @@ using namespace Rcpp;
 #include "deco.h"
 
 // [[Rcpp::export]]
-arma::mat DECO_LASSO_C_PARALLEL(arma::vec Y, arma::mat X, int p, int n, int m, float lambda, float r_1,
-                        int ncores = 1, bool intercept = true, bool refinement = true) {
+arma::mat DECO_LASSO_C_PARALLEL(arma::vec& Y, arma::mat& X, int p, int n, int m, float lambda, float r_1,
+                        int ncores = 1, bool intercept = true, bool refinement = true, bool parallel_lasso = false) {
   // STEP 0: INITIALIZATION OF VARIABLES
   arma::mat Y_stand, X_stand(X), mean_col(mean(X,0)), XX;
   arma::vec Y_new, coef0, coefs;
@@ -41,7 +41,6 @@ arma::mat DECO_LASSO_C_PARALLEL(arma::vec Y, arma::mat X, int p, int n, int m, f
     int endGroup = (i!=(m-1)) ? p_over_m*(i+1)-1 : (p-1); //shortcut for if
     Xi[i] = X_stand.submat(0, startGroup, n-1, endGroup);
   }
-
   // STEP 1.3 Distribution on machines
   //Only relevant in implementations that actually load the data into different machines
 
@@ -76,11 +75,16 @@ arma::mat DECO_LASSO_C_PARALLEL(arma::vec Y, arma::mat X, int p, int n, int m, f
 
   // STEP 3.1 LASSO for coefs on each partition i
   Environment RDeco("package:RDeco");
-  Function lassoCoef = RDeco["lassoCoef"]; //Getting the function lassoCoef from package RDeco
-  for(int i=0; i<m; i++) { //Can NOT parallelize this because it calls an R function!
-    int startGroup = p_over_m*i;
-    int endGroup = (i!=(m-1)) ? p_over_m*(i+1)-1 : (p-1); //shortcut for if
-    coefs.subvec(startGroup,endGroup) = lassoRCoef(X_new[i],Y_new,1.0,2*lambda,false,lassoCoef);
+  if(parallel_lasso) {
+    Function lassoCoefParallel = RDeco["lassoCoefParallel"];
+    coefs = lassoRCoefParallel(X_new,Y_new,1.0,2*lambda,false,m,lassoCoefParallel);
+  } else {
+    Function lassoCoef = RDeco["lassoCoef"]; //Getting the function lassoCoef from package RDeco
+    for(int i=0; i<m; i++) { //Can NOT parallelize this because it calls an R function!
+      int startGroup = p_over_m*i;
+      int endGroup = (i!=(m-1)) ? p_over_m*(i+1)-1 : (p-1); //shortcut for if
+      coefs.subvec(startGroup,endGroup) = lassoRCoef(X_new[i],Y_new,1.0,2*lambda,false,lassoCoef);
+    }
   }
   delete[] X_new;
 

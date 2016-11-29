@@ -11,6 +11,17 @@ arma::vec lassoRCoef(arma::mat& X, arma::vec& Y, double nlambda,
   return res_arm;
 }
 
+arma::vec lassoRCoefParallel(arma::mat* X, arma::vec& Y, double nlambda,
+                        double lambda, bool intercept, int m, Function& f) {
+  //Convert data Xi to a list so that it can be feed into R
+  Rcpp::List data(m);
+  for(int i=0; i<m; i++){
+    data[i] = X[i];
+  }
+  NumericVector res = f(data, Y, nlambda, lambda, intercept, m);
+  arma::vec res_arm(res.begin(), res.size(), false); //converting numericvector to armadillo by reference (not copying)
+  return res_arm;
+}
 
 //' DECO Parallelized Algorithm (Pure C)
 //'

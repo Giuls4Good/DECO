@@ -120,7 +120,6 @@ DECO_LASSO_R <- function(Y, X, p=NULL, n=NULL, m=1, lambda, r_1, r_2 = r_1, ncor
                            return(myCoefs[-1]) #no intercept included
                          }, mc.cores=ncores
   ))
-
   #**   STEP 3.3 Insert Intercept into coefs         **#
   if(intercept) {
     coef0 <- mean(Y_orig) - colMeans(X_orig)%*%coefs
