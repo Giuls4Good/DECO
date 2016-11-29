@@ -20,7 +20,7 @@ using namespace Rcpp; using namespace arma;
 //'         - we should be able to just return a pointer to a (changed) beta (more efficient than local copies!)
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-arma::vec update_naive(arma::vec &beta, arma::mat &X, arma::vec &Y, double lambda, int n, int p){
+arma::vec update_naive(arma::vec beta, arma::mat &X, arma::vec &Y, double lambda, int n, int p){
 
   //STEP 1: declare the quantities needed
   double Soft_Thresholding_argument; //will hold the argument inside S(., lambda) (thresholding function)
@@ -51,6 +51,7 @@ arma::vec update_naive(arma::vec &beta, arma::mat &X, arma::vec &Y, double lambd
     }else{
       beta(i) = 0;
     }
+    //Rprintf("We have ThresholdArgument = %f\n", Soft_Thresholding_argument);
 
     //put back Xi at the right place
     (X).col(i) = Xi;
@@ -107,11 +108,13 @@ arma::vec coordinateDescent_naive(arma::mat &X, arma::vec &Y, double lambda, dou
   while(!criterion && count<=max_iter){
     Rcpp::checkUserInterrupt();                                         //check if User pressed 'Stop'
     beta_update = update_naive(beta, X, Y, lambda, n, p);                 //get updated beta
-    criterion =  ( (max(abs(beta_update - beta))) < precision );       //check if your convergence criterion is satisfied
+    //criterion =  (( (abs(beta_update - beta)).max()) < precision);       //check if your convergence criterion is satisfied
+    if( ( abs(beta_update - beta).max() ) < precision){criterion = true;}
     count++;                                                        //update the loop counter
     beta = beta_update;  //Update the beta
   }
 
+  Rprintf("number of iterations was %i", count);
   //return the beta-vector
   return(beta);
 }
