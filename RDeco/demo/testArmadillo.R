@@ -3,24 +3,26 @@ library(expm)
 library(rbenchmark)
 
 #STANDARDIZE VECTOR
-v <- 1:50000
+v <- 1:5000000
 stand_v <- as.vector(v-mean(v))
 if (all.equal(stand_v,as.vector(standardizeVector(v)))) {
   print("SUCCESS!")
 } else {
   print("ERROR! Something is wrong with standardize vector...")
 }
-benchmark(Rway <- v-mean(v),standardizeVector(v))
+benchmark(Rway <- v-mean(v),standardizeVector(v)) #R version is faster
 
 #STANDARDIZE MATRIX
-M <- matrix(1:10, nrow=10)
-stand_m <- M-colMeans(M)
+n<-1000
+p <- 5000
+M <- matrix(rnorm(n*p,10,5), nrow=n)
+stand_m <- scale(M,scale=FALSE)[,]
 if (all.equal(stand_m,standardizeMatrix(M))) {
   print("SUCCESS!")
 } else {
   print("ERROR! Something is wrong with standardize vector...")
 }
-benchmark(Rway <- M-colMeans(M),standardizeMatrix(M))
+benchmark(scale(M,scale=FALSE),standardizeMatrix(M)) #C version is faster (x2)
 
 
 #TRANSPOSE MATRIX
@@ -30,30 +32,30 @@ if (all.equal(t(M),tMatrix(M))) {
 } else {
   print("ERROR! Something is wrong with standardize vector...")
 }
-benchmark(t(M),tMatrix(M))
+benchmark(t(M),tMatrix(M)) #R version is faster
 
 #MULTIPLY MATRIXCS
-A <- matrix(rnorm(1000*5,10,5), nrow=1000, ncol=5)
-B <- matrix(rnorm(1000*5,10,5), nrow=5, ncol=1000)
+A <- matrix(rnorm(1000*500,10,5), nrow=1000, ncol=500)
+B <- matrix(rnorm(1000*500,10,5), nrow=500, ncol=1000)
 if (all.equal(A%*%B,mulMatrices(A,B))) {
   print("SUCCESS!")
 } else {
   print("ERROR! Something is wrong with standardize vector...")
 }
-benchmark(A%*%B,mulMatrices(A,B))
+benchmark(A%*%B,mulMatrices(A,B)) #Same speed
 
 #INVERSE MATRIX
-M <- matrix(rnorm(100^2,10,5), nrow=100)
+M <- matrix(rnorm(1000^2,10,5), nrow=1000)
 M_symm <- M%*%t(M)
 if (all.equal(solve(M_symm),invSymmMatrix(M_symm))) {
   print("SUCCESS!")
 } else {
   print("ERROR! Something is wrong with standardize vector...")
 }
-benchmark(solve(M_symm),invSymmMatrix(M_symm))
+benchmark(solve(M_symm),invSymmMatrix(M_symm)) #C++ version faster (2.5x)
 
 #SQUARE ROOT OF SYMMETRIC MATRIX
-n <- 50
+n <- 100
 A <- matrix(rnorm(n*n,mean=10,sd=5),nrow=n)
 A_symm <- A%*%t(A)
 if (all.equal(sqrtm(A_symm),squareRootSymmetric(A_symm))) {
@@ -61,4 +63,4 @@ if (all.equal(sqrtm(A_symm),squareRootSymmetric(A_symm))) {
 } else {
   print("ERROR! Something is wrong with the square root of a symmetric matrix...")
 }
-benchmark(sqrtm(A_symm),squareRootSymmetric(A_symm))
+benchmark(sqrtm(A_symm),squareRootSymmetric(A_symm)) #C++ version faster (100x)

@@ -25,3 +25,7 @@ invSymmMatrix <- function(M) {
     .Call('RDeco_invSymmMatrix', PACKAGE = 'RDeco', M)
 }
 
+DECO_LASSO_C <- function(Y, X, p, n, lambda, r, ncores = 1L, intercept = TRUE) {
+    .Call('RDeco_DECO_LASSO_C', PACKAGE = 'RDeco', Y, X, p, n, lambda, r, ncores, intercept)
+}
+
