@@ -1,0 +1,234 @@
+
+R version 3.3.1 (2016-06-21) -- "Bug in Your Hair"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "RDeco"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> library('RDeco')
+Loading required package: RcppArmadillo
+Loading required package: parallel
+Loading required package: glmnet
+Loading required package: Matrix
+Loading required package: foreach
+Loaded glmnet 2.0-5
+
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("invSymmMatrix")
+> ### * invSymmMatrix
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: invSymmMatrix
+> ### Title: Inverse of a matrix
+> ### Aliases: invSymmMatrix
+> 
+> ### ** Examples
+> 
+> require(rbenchmark)
+Loading required package: rbenchmark
+> M <- matrix(rnorm(1000^2,10,5), nrow=1000)
+> M_symm <- M%*%t(M)
+> benchmark(solve(M_symm),invSymmMatrix(M_symm),order='relative')
+                   test replications elapsed relative user.self sys.self
+2 invSymmMatrix(M_symm)          100  34.671    1.000    34.389    0.164
+1         solve(M_symm)          100  80.817    2.331    80.465    0.221
+  user.child sys.child
+2          0         0
+1          0         0
+> 
+> 
+> 
+> 
+> cleanEx()
+
+detaching ‘package:rbenchmark’
+
+> nameEx("mulMatrices")
+> ### * mulMatrices
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: mulMatrices
+> ### Title: Multiply two matrices
+> ### Aliases: mulMatrices
+> 
+> ### ** Examples
+> 
+> require(rbenchmark)
+Loading required package: rbenchmark
+> A <- matrix(rnorm(1000*500,10,5), nrow=1000, ncol=500)
+> B <- matrix(rnorm(1000*500,10,5), nrow=500, ncol=1000)
+> benchmark(A%*%B,mulMatrices(A,B),order='relative')
+               test replications elapsed relative user.self sys.self user.child
+2 mulMatrices(A, B)          100  25.100    1.000    24.990    0.075          0
+1           A %*% B          100  25.383    1.011    25.267    0.072          0
+  sys.child
+2         0
+1         0
+> 
+> 
+> 
+> 
+> cleanEx()
+
+detaching ‘package:rbenchmark’
+
+> nameEx("squareRootSymmetric")
+> ### * squareRootSymmetric
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: squareRootSymmetric
+> ### Title: Square root of a symmetric matrix
+> ### Aliases: squareRootSymmetric
+> 
+> ### ** Examples
+> 
+> require(expm)
+Loading required package: expm
+
+Attaching package: ‘expm’
+
+The following object is masked from ‘package:Matrix’:
+
+    expm
+
+> require(rbenchmark)
+Loading required package: rbenchmark
+> A <- matrix(rnorm(10000,mean=10,sd=5),nrow=100)
+> A_symm <- A%*%t(A)
+> benchmark(sqrtm(A_symm),squareRootSymmetric(A_symm), order='relative')
+Note: method with signature ‘symmetricMatrix#missing’ chosen for function ‘Schur’,
+ target signature ‘dsyMatrix#missing’.
+ "dsyMatrix#ANY" would also be valid
+                         test replications elapsed relative user.self sys.self
+2 squareRootSymmetric(A_symm)          100   0.312    1.000     0.312        0
+1               sqrtm(A_symm)          100  32.157  103.067    32.097        0
+  user.child sys.child
+2          0         0
+1          0         0
+> 
+> 
+> 
+> 
+> cleanEx()
+
+detaching ‘package:rbenchmark’, ‘package:expm’
+
+> nameEx("standardizeMatrix")
+> ### * standardizeMatrix
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: standardizeMatrix
+> ### Title: Standardize a matrix so that its mean is equal to 0
+> ### Aliases: standardizeMatrix
+> 
+> ### ** Examples
+> 
+> require(rbenchmark)
+Loading required package: rbenchmark
+> M <- matrix(rnorm(1000*5000,10,5), nrow=1000)
+> benchmark(scale(M,scale=FALSE),standardizeMatrix(M), order='relative')
+                     test replications elapsed relative user.self sys.self
+2    standardizeMatrix(M)          100   3.125    1.000     1.469    1.648
+1 scale(M, scale = FALSE)          100   6.012    1.924     4.445    1.551
+  user.child sys.child
+2          0         0
+1          0         0
+> 
+> 
+> 
+> 
+> cleanEx()
+
+detaching ‘package:rbenchmark’
+
+> nameEx("standardizeVector")
+> ### * standardizeVector
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: standardizeVector
+> ### Title: Standardize a vector
+> ### Aliases: standardizeVector
+> 
+> ### ** Examples
+> 
+> require(rbenchmark)
+Loading required package: rbenchmark
+> v <- 1:5000000
+> benchmark({v-mean(v)},standardizeVector(v),scale(v,scale=FALSE), order='relative')
+                     test replications elapsed relative user.self sys.self
+1   {\n    v - mean(v)\n}          100   2.123    1.000     1.291    0.827
+2    standardizeVector(v)          100   5.315    2.504     2.037    3.265
+3 scale(v, scale = FALSE)          100  10.536    4.963     8.840    1.672
+  user.child sys.child
+1          0         0
+2          0         0
+3          0         0
+> 
+> 
+> 
+> 
+> cleanEx()
+
+detaching ‘package:rbenchmark’
+
+> nameEx("tMatrix")
+> ### * tMatrix
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: tMatrix
+> ### Title: Transpose of a matrix
+> ### Aliases: tMatrix
+> 
+> ### ** Examples
+> 
+> require(rbenchmark)
+Loading required package: rbenchmark
+> M <- matrix(rnorm(1000*5000,10,5), nrow=1000)
+> benchmark(t(M),tMatrix(M),order='relative')
+        test replications elapsed relative user.self sys.self user.child
+1       t(M)          100   5.355    1.000     4.535    0.809          0
+2 tMatrix(M)          100   7.662    1.431     5.156    2.489          0
+  sys.child
+1         0
+2         0
+> 
+> 
+> 
+> 
+> ### * <FOOTER>
+> ###
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  230.9 13.014 244.463 0 0 
+> grDevices::dev.off()
+null device 
+          1 
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')

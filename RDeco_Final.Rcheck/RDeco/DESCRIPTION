@@ -1,0 +1,15 @@
+Package: RDeco
+Type: Package
+Title: Clusterized and parallelized implmentation of DECO algorithm
+Version: 0.1.0
+Author: J. Carter, S. Davenport, J. Knoblauch, G. Morina
+Maintainer: Sam Davenport <sam.davenport@spc.ox.ac.uk>
+Description: The package provides methods to run the DECO algorithm as described in "DECOrrelated feature space partitioning
+  for distributed sparse regression" in Wang, Dunson, and Leng (2016).
+License: Undefined
+LazyData: TRUE
+Imports: Rcpp (>= 0.12.8), RcppArmadillo (>= 0.7.500.0)
+LinkingTo: Rcpp, RcppArmadillo
+Depends: RcppArmadillo, parallel, glmnet
+RoxygenNote: 5.0.1
+Built: R 3.3.1; x86_64-pc-linux-gnu; 2016-11-30 17:05:20 UTC; unix
