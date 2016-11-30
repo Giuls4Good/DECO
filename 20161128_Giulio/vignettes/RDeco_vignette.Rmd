@@ -2,6 +2,8 @@
 title: "RDeco Package"
 author: Jack Carter, Samuel Davenport, Jeremias Knoblauch, Giulio Morina
 output: pdf_document
+header-includes:
+   - \usepackage{amssymb}
 ---
 
 ```{r setup, echo=FALSE, message=FALSE}
@@ -11,16 +13,18 @@ require(rbenchmark)
 
 ## DECO Algorithm
 
-A short description of the algorithm should be included here!!
+DECO Algorithm provides a way to compute Lasso regression coefficients in a parallel and distributed way when $p \gg n$, where $p$ is the number of covariates and $n$ is the number of observations. The algorithm is based on splitting the $n \times p$ matrix $X$ vertically in $m$ submatrices. 
+
+The theoretical fundation behind the algorithm can be found in "DECOrrelated feature space partitioning for distributed sparse regression" papaer by  Wang, Dunson, and Leng (2016).
 
 ## RDeco package
 
-The package implements 4 different functions of the DECO algorithm:
+\texttt{RDeco} package provides 4 different implementations of the DECO algorithm:
 \begin{itemize}
 \item \texttt{DECO\char`_LASSO\char`_R}: a pure R implementation.
 \item \texttt{DECO\char`_LASSO\char`_MIX}: a mix of R and C++ code.
 \item \texttt{DECO\char`_LASSO\char`_C\char`_PARALLEL}: a pure C++ code.
-\item \texttt{DECO\char`_LASSO\char`_R\char`_CLUSTER}: a pure R implementation for splitting the work load on different machines (still in development).
+\item \texttt{DECO\char`_LASSO\char`_R\char`_CLUSTER}: a pure R implementation for splitting the work load on different machines (still not stable).
 \end{itemize}
 
 Given the same dataset and same parameters, the four functions all return the same result:

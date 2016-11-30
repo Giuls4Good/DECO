@@ -23,6 +23,7 @@ This function is about 4 times slower than R function \code{t}.
 }
 \examples{
 require(rbenchmark)
+M <- matrix(rnorm(1000*5000,10,5), nrow=1000)
 benchmark(t(M),tMatrix(M),order='relative')
 
 }
