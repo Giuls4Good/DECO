@@ -1,0 +1,12 @@
+* installing *source* package ‘RDeco’ ...
+** libs
+make: Nothing to be done for 'all'.
+installing to /homes/davenpor/global/module4/DECO/20161128_Giulio/..Rcheck/RDeco/libs
+** R
+** preparing package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded
+* DONE (RDeco)

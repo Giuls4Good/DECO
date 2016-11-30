@@ -7,21 +7,21 @@ using namespace Rcpp; using namespace arma;
 //CONTAINS: update_naive, coordinateDescent_naive
 
 
-//' TITLE OF THIS FUNCTION
-//'
-//' @param beta gives the arma::vec vector of beta-estimates at the current iteration of Coordinate descent
-//' @param X gives the arma::mat matrix of regressors in this partition of all regressors (there are m partitions
-//'        in total, and we run coordinate descent on each partition)
-//' @param Y gives the arma::vec vector of observations that we project X onto
-//' @param lambda gives the double giving our lambda coefficient
-//' @param n gives an integer corresponding to the number of rows (observations) of X (Y)
-//' @param p gives the integer corresponding to the number of columns/regressors contained in X
-//' @export
-//' @return an updated version of beta
-//'         NEEDS CHANGING:
-//'         - we should compute Xi'Xi once for each i, and then supply it as another parameter?
-//'         - we should be able to just return a pointer to a (changed) beta (more efficient than local copies!)
-// [[Rcpp::export]]
+//  Naive Coordinate Update
+//
+//  @param beta   the vector of beta-estimates at the current iteration of Coordinate descent.
+//  @param X      the arma::mat matrix of regressors in this partition of all regressors (there are m partitions
+//         in total, and we run coordinate descent on each partition).
+//  @param Y      the arma::vec vector of observations that we project X onto.
+//  @param lambda  the double giving our lambda coefficient.
+//  @param n      an integer corresponding to the number of rows (observations) of X (Y).
+//  @param p      the integer corresponding to the number of columns/regressors contained in X.
+//  @export update_naive
+//  @return an updated version of beta
+//          NEEDS CHANGING:
+//          - we should compute Xi'Xi once for each i, and then supply it as another parameter?
+//          - we should be able to just return a pointer to a (changed) beta (more efficient than local copies!)
+//// [[Rcpp::export]]       We don't need to export this function to R.
 arma::vec update_naive(arma::vec &beta, arma::mat &X, arma::vec &Y, double lambda, int n, int p){
   //THIS FUNCTION DEPENDA ON ARMADILLO!
   //STEP 1: declare the quantities needed
@@ -64,22 +64,21 @@ arma::vec update_naive(arma::vec &beta, arma::mat &X, arma::vec &Y, double lambd
 }
 
 
-//' TITLE OF THIS FUNCTION
-//'
-//' @param X gives the arma::mat matrix of regressors in this partition of all regressors (there are m partitions
-//'        in total, and we run coordinate descent on each partition)
-//' @param Y gives the arma::vec vector of observations that we project X onto
-//' @param lambda gives the double giving our lambda coefficient
-//' @param precision gives the convergence criterion (how close two subsequent iterations should be before termination)
-//' @param max_iter gives the maximum number of iterations in the inner update loop of coordinate descent
-//' @export
-//' @return an updated version of beta
-//'         NEEDS CHANGING:
-//'         - we should compute Xi'Xi once for each i, and then supply it as another parameter?
-//'         - we should be able to just return a pointer to a (changed) beta (more efficient than local copies!)
-// [[Rcpp::export]]
+// Coodinate Descent
+//
+// @param X gives the arma::mat matrix of regressors in this partition of all regressors (there are m partitions
+//        in total, and we run coordinate descent on each partition).
+// @param Y gives the arma::vec vector of observations that we project X onto.
+// @param lambda gives the double giving our lambda coefficient.
+// @param precision gives the convergence criterion (how close two subsequent iterations should be before termination).
+// @param max_iter gives the maximum number of iterations in the inner update loop of coordinate descent.
+// @export
+// @return an updated version of beta
+//         NEEDS CHANGING:
+//         - we should compute Xi'Xi once for each i, and then supply it as another parameter?
+//         - we should be able to just return a pointer to a (changed) beta (more efficient than local copies!)
+//// [[Rcpp::export]] We don't need to export this function to R.
 arma::vec coordinateDescent_naive(arma::mat X, arma::vec Y, double lambda, double precision, int max_iter){
-  //THIS FUNCTION DEPENDA ON ARMADILLO!
   //STEP 1: INITIALIZATION
   unsigned int p = X.n_cols, n = X.n_rows; //get p (n) as the number of rows (columns) of the regression matrix
   vec beta, beta_update; //declare beta

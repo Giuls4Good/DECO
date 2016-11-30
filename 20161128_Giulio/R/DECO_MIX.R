@@ -1,23 +1,24 @@
 #' DECO Parallelized Algorithm (Mixture of R and C++)
 #'
-#' @param Y gives the nx1 vector of observations we wish to approximate with a linear model of type Y = Xb + e
-#' @param X gives the nxp matrix of regressors, each column corresponding to a different regressor
+#' This implements the algorithm DECO using a mixture of R and C++ code.
+#'
+#' @param Y gives the nx1 vector of observations we wish to approximate with a linear model of type Y = Xb + e.
+#' @param X gives the nxp matrix of regressors, each column corresponding to a different regressor.
 #' @param p is the column dimension of X [equivalently, p is the number of regressor variables].
 #' If not given, it is computed as the number of columns of X.
-#' @param n is the row dimension of X (and Y) [equivalently, n is the number of observations/individuals]
+#' @param n is the row dimension of X (and Y) [equivalently, n is the number of observations/individuals].
 #' If not given, it is computed as the number of rows of X.
-#' @param m is the number of groups/blocks you wish to split X into, denoted X(i) for 1 <= i <= m
-#' @param lambda gives the (fixed) penalty magnitude in the LASSO fit of the algorithm
-#' @param ncores determines the number of cores used on each machine to parallelize computation
-#' @param r_1 is a tweaking parameter for making the inverse more robust (as we take inverse of XX + r_1*I)
-#' @param r_2 is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I)
-#' @param intercept determines whether to include an intercept in the model or not
-#' @param refinement determines whether to include the refinement step (Stage 3 of the algorithm)
+#' @param m is the number of groups/blocks you wish to split X into, denoted X(i) for 1 <= i <= m.
+#' @param lambda gives the (fixed) penalty magnitude in the LASSO fit of the algorithm.
+#' @param ncores determines the number of cores used on each machine to parallelize computation.
+#' @param r_1 is a tweaking parameter for making the inverse more robust (as we take inverse of XX + r_1*I).
+#' @param r_2 is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I).
+#' @param intercept determines whether to include an intercept in the model or not.
+#' @param refinement determines whether to include the refinement step (Stage 3 of the algorithm).
 #' @author Samuel Davenport, Jack Carter, Giulio Morina, Jeremias Knoblauch
-#' @details The algorithm is based on the description in "DECOrrelated feature space partitioning
-#'          for distributed sparse regression" in Wang, Dunson, and Leng (2016) if lambda is fixed and
-#'          LASSO is used as the penalized regression scheme. The rotated versions of Y and X the authors denote
-#'          with Tilde are denoted as X* and Y* in the comments below
+#' @details This implements the algorithm DECO which was introducted in "DECOrrelated feature space partitioning
+#' for distributed sparse regression" by Wang, Dunson, and Leng (2016). It assumes that we take the lasso to be the penalized
+#' regression scehme.
 #' @note -This implementation uses both R functions and C++ functions. In particular, \code{standardizeMatrix},
 #' \code{invSymmMatrix}, \code{squareRootSymmetric} functions are used when needed in place of native R functions.
 #' Higher speed can be achieved by using other functions provided in the package.
@@ -25,17 +26,10 @@
 #' -This implementation is suboptimal in that X is already stored in the memory when we start the procedure.
 #'       Ideally, one would give in only the LOCATION X is stored at and read it in chunkwise (thus allowing for
 #'       larger matrices X, as was intended by the authors).
-#'
-#'       -The notation #~PARALLEl~# will be introduced in the code whereever one may achieve signficiant gains from
-#'       parallelizing
-#'
-#'       -I could evaluate old expressions in the R version within the mcapply loops! ->saves memory as we write over old
-#'       data
-#'
-#'       -We cannot disturb variable order within the algorithm for output comparison reasons, thus reorder X columns before
-#'       running DECO_LASSO (if important)
 #' @export
 DECO_LASSO_MIX <- function(Y, X, p=NULL, n=NULL, m=1, lambda, r_1, r_2 = r_1, ncores=1, intercept=TRUE, refinement = TRUE){
+  #The rotated versions of Y and X the authors denote with Tilde are denoted as X* and Y* in the comments below.
+  #The notation #~PARALLEL~# will be introduced in the code whereever one may achieve signficiant gains from parallelizing.
   #***  STEP 1: INITIALIZATION  ***#
 
   # STEP 0 Check if input parameters are compatible and if n,p are given
