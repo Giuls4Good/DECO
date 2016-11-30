@@ -27,8 +27,43 @@ The theoretical fundation behind the algorithm can be found in "DECOrrelated fea
 \item \texttt{DECO\char`_LASSO\char`_R\char`_CLUSTER}: a pure R implementation for splitting the work load on different machines (still not stable).
 \end{itemize}
 
+All four functions currently only accept a fixed penalization parameter $\lambda$ and do not implement an automatic way to tune it. 
+
 Given the same dataset and same parameters, the four functions all return the same result:
 
+```{r data, eval=TRUE}
+#Generating a simulated dataset
+set.seed(100)
+n<-5
+p<-17
+m<-4
+sigma<-1
+lambda<-0.03
+r<-0.01
+X<-matrix(rnorm(n*p, sd=1), nrow=n)
+eps<-rnorm(n, mean = 0, sd = sigma)
+activeCoefs<-sample(c(0,1),p, prob=c(0.5, 0.1), replace=TRUE)  ##get coefficients that impact Y
+coefs<-activeCoefs*1
+Y<-X%*%coefs + eps
+ncores <- 8
+clust <- makePSOCKcluster(c("greywagtail",
+                             "greyheron",
+                             "greypartridge",
+                             "greyplover"))
+for (refinement in c(FALSE,TRUE)) {
+  res<-DECO_LASSO_R(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r,r_2=0.001, ncores = ncores, refinement = refinement)
+  res_mix<-DECO_LASSO_MIX(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r,r_2=0.001, ncores = ncores, refinement = refinement)
+  res_C<-as.vector(t(DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r,r_2=0.001, ncores = ncores, refinement = refinement)))
+  res_cluster <- DECO_LASSO_R_CLUSTER(Y, X, p=p, n=n, lambda=lambda, r_1=r, r_2=0.001, clust=clust, ncores=ncores, refinement = refinement)
+  if(all.equal(res,res_mix) == TRUE && all.equal(res,res_C) == TRUE && all.equal(res_C,res_cluster) == TRUE) {
+    print("All functions return the same result!")
+  } else {
+    print("NOT all functions return the same result...")
+  }
+}
+stopCluster(clust)
+
+```
 
 Since \texttt{DECO\char`_LASSO\char`_C\char`_PARALLEL} function is entirely written in C++, it is faster than both \texttt{DECO\char`_LASSO\char`_MIX} and \texttt{DECO\char`_LASSO\char`_R}.
 

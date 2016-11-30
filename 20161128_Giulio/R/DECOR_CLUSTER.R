@@ -34,7 +34,7 @@ DECO_LASSO_R_CLUSTER <- function(Y, X, p, n, lambda, r_1, clust, r_2 = r_1, ncor
   Y_orig  <- Y
 
   #**   STEP 1.1 Mean Standardization         **#
-  Y <- as.vector(Y - mean(Y));
+  Y_stand <- as.vector(Y - mean(Y));
   X <- scale(X,scale=FALSE)[,]
 
   #**   STEP 1.2 Arbitrary Partitioning       **#
@@ -69,7 +69,7 @@ DECO_LASSO_R_CLUSTER <- function(Y, X, p, n, lambda, r_1, clust, r_2 = r_1, ncor
   XX_Inverse_Sqrt <- XX_Inverse_Sqrt%*%t(SVD_Object$u); rm(SVD_Object);gc()
 
   #**   STEP 2.4 Compute Y* and X*(i) for each i    **#
-  Y <- XX_Inverse_Sqrt%*%Y
+  Y <- XX_Inverse_Sqrt%*%Y_stand
   Xi2 <- mclapply(1:nclusters,
                   function(i){
                     return(XX_Inverse_Sqrt%*%(Xi[[i]]))        #Compute XX_Inverse_Sqrt%*%Xi for all i

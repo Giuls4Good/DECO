@@ -59,7 +59,7 @@ DECO_LASSO_MIX <- function(Y, X, p=NULL, n=NULL, m=1, lambda, r_1, r_2 = r_1, nc
   }
 
   #**   STEP 1.1 Mean Standardization         **#
-  Y <- as.vector(Y - mean(Y));
+  Y_stand <- as.vector(Y - mean(Y));
   X <- standardizeMatrix(X) #Do not divide by standard deviation, just puts mean equal 0
 
   #**   STEP 1.2 Arbitrary Partitioning       **#
@@ -98,7 +98,7 @@ DECO_LASSO_MIX <- function(Y, X, p=NULL, n=NULL, m=1, lambda, r_1, r_2 = r_1, nc
   XX_Inverse_Sqrt <- sqrt(p)*squareRootSymmetric(XX_Inverse)
 
   #**   STEP 2.4 Compute Y* and X*(i) for each i    **#
-  Y <- XX_Inverse_Sqrt%*%Y
+  Y <- XX_Inverse_Sqrt%*%Y_stand
   Xi2 <- mclapply(1:m,
                   function(i){
                     return(XX_Inverse_Sqrt%*%(Xi[[i]]))        #Compute XX_Inverse_Sqrt%*%Xi for all i
