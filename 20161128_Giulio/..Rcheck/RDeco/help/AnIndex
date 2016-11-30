@@ -1,0 +1,13 @@
+DECO_LASSO_C	DECO_LASSO_C
+DECO_LASSO_C_PARALLEL	DECO_LASSO_C_PARALLEL
+DECO_LASSO_MIX	DECO_LASSO_MIX
+DECO_LASSO_R	DECO_LASSO_R
+DECO_LASSO_R_CLUSTER	DECO_LASSO_R_CLUSTER
+invSymmMatrix	invSymmMatrix
+lassoCoef	lassoCoef
+lassoCoefParallel	lassoCoefParallel
+mulMatrices	mulMatrices
+squareRootSymmetric	squareRootSymmetric
+standardizeMatrix	standardizeMatrix
+standardizeVector	standardizeVector
+tMatrix	tMatrix

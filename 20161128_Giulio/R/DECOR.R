@@ -1,18 +1,21 @@
 #' DECO Parallelized Algorithm (Pure R)
 #'
-#' @param Y gives the nx1 vector of observations we wish to approximate with a linear model of type Y = Xb + e
-#' @param X gives the nxp matrix of regressors, each column corresponding to a different regressor
+#' This implements the algorithm DECO which was introducted in "DECOrrelated feature space partitioning for distributed sparse regression" by Wang, Dunson, and Leng (2016). It assumes that we
+#' take the lasso to be the penalized regression scehme.
+#'
+#' @param Y gives the nx1 vector of observations we wish to approximate with a linear model of type Y = Xb + e.
+#' @param X gives the nxp matrix of regressors, each column corresponding to a different regressor.
 #' @param p is the column dimension of X [equivalently, p is the number of regressor variables].
 #' If not given, it is computed as the number of columns of X.
-#' @param n is the row dimension of X (and Y) [equivalently, n is the number of observations/individuals]
+#' @param n is the row dimension of X (and Y) [equivalently, n is the number of observations/individuals].
 #' If not given, it is computed as the number of rows of X.
-#' @param m is the number of groups/blocks you wish to split X into, denoted X(i) for 1 <= i <= m
-#' @param lambda gives the (fixed) penalty magnitude in the LASSO fit of the algorithm
-#' @param ncores determines the number of cores used on each machine to parallelize computation
-#' @param r_1 is a tweaking parameter for making the inverse more robust (as we take inverse of XX + r_1*I)
-#' @param r_2 is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I)
-#' @param intercept determines whether to include an intercept in the model or not
-#' @param refinement determines whether to include the refinement step (Stage 3 of the algorithm)
+#' @param m is the number of groups/blocks you wish to split X into, denoted X(i) for 1 <= i <= m.
+#' @param lambda gives the (fixed) penalty magnitude in the LASSO fit of the algorithm.
+#' @param ncores determines the number of cores used on each machine to parallelize computation.
+#' @param r_1 is a tweaking parameter for making the inverse more robust (as we take inverse of XX + r_1*I).
+#' @param r_2 is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I).
+#' @param intercept determines whether to include an intercept in the model or not.
+#' @param refinement determines whether to include the refinement step (Stage 3 of the algorithm).
 #' @author Samuel Davenport, Jack Carter, Giulio Morina, Jeremias Knoblauch
 #' @details The algorithm is based on the description in "DECOrrelated feature space partitioning
 #'          for distributed sparse regression" in Wang, Dunson, and Leng (2016) if lambda is fixed and

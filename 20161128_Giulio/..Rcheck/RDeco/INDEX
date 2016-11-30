@@ -1,0 +1,15 @@
+DECO_LASSO_C            DECO Parallelized Algorithm (Pure C)
+DECO_LASSO_C_PARALLEL   DECO Parallelized Algorithm (Pure C++)
+DECO_LASSO_MIX          DECO Parallelized Algorithm (Mixture of R and
+                        C++)
+DECO_LASSO_R            DECO Parallelized Algorithm (Pure R)
+DECO_LASSO_R_CLUSTER    DECO Clusterized Algorithm (Pure R)
+invSymmMatrix           Inverse of a matrix
+lassoCoef               Lasso coefficients (singol core implementation)
+lassoCoefParallel       Lasso coefficients (parallel implementation)
+mulMatrices             Multiply two matrices
+squareRootSymmetric     Square root of a symmetric matrix
+standardizeMatrix       Standardize a matrix so that its mean is equal
+                        to 0
+standardizeVector       Standardize a vector
+tMatrix                 Transpose of a matrix

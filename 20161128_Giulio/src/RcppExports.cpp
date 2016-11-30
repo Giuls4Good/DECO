@@ -73,37 +73,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// update_naive
-arma::vec update_naive(arma::vec& beta, arma::mat& X, arma::vec& Y, double lambda, int n, int p);
-RcppExport SEXP RDeco_update_naive(SEXP betaSEXP, SEXP XSEXP, SEXP YSEXP, SEXP lambdaSEXP, SEXP nSEXP, SEXP pSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec& >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_naive(beta, X, Y, lambda, n, p));
-    return rcpp_result_gen;
-END_RCPP
-}
-// coordinateDescent_naive
-arma::vec coordinateDescent_naive(arma::mat X, arma::vec Y, double lambda, double precision, int max_iter);
-RcppExport SEXP RDeco_coordinateDescent_naive(SEXP XSEXP, SEXP YSEXP, SEXP lambdaSEXP, SEXP precisionSEXP, SEXP max_iterSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< double >::type precision(precisionSEXP);
-    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
-    rcpp_result_gen = Rcpp::wrap(coordinateDescent_naive(X, Y, lambda, precision, max_iter));
-    return rcpp_result_gen;
-END_RCPP
-}
 // DECO_LASSO_C
 arma::mat DECO_LASSO_C(arma::vec Y, arma::mat X, int p, int n, float lambda, float r, int ncores, bool intercept);
 RcppExport SEXP RDeco_DECO_LASSO_C(SEXP YSEXP, SEXP XSEXP, SEXP pSEXP, SEXP nSEXP, SEXP lambdaSEXP, SEXP rSEXP, SEXP ncoresSEXP, SEXP interceptSEXP) {

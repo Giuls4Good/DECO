@@ -1,0 +1,155 @@
+* using log directory ‘/homes/davenpor/global/module4/DECO/20161128_Giulio/..Rcheck’
+* using R version 3.3.1 (2016-06-21)
+* using platform: x86_64-pc-linux-gnu (64-bit)
+* using session charset: UTF-8
+* checking for file ‘./DESCRIPTION’ ... OK
+* checking extension type ... Package
+* this is package ‘RDeco’ version ‘0.1.0’
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... WARNING
+Subdirectory ‘RDeco/src’ contains apparent object files/libraries
+  /homes/davenpor/global/module4/DECO/20161128_Giulio/src/ArmadilloFunctions.o
+  /homes/davenpor/global/module4/DECO/20161128_Giulio/src/DECO.o
+  /homes/davenpor/global/module4/DECO/20161128_Giulio/src/DECOParallel.o
+  /homes/davenpor/global/module4/DECO/20161128_Giulio/src/DECOParallel_WRONG.o
+  /homes/davenpor/global/module4/DECO/20161128_Giulio/src/RDeco.so
+  /homes/davenpor/global/module4/DECO/20161128_Giulio/src/RcppExports.o
+  /homes/davenpor/global/module4/DECO/20161128_Giulio/src/coordinateDescent_naive.o
+  /homes/davenpor/global/module4/DECO/20161128_Giulio/src/refinementstep.o
+  /homes/davenpor/global/module4/DECO/20161128_Giulio/src/testParallel.o
+  /homes/davenpor/global/module4/DECO/20161128_Giulio/src/testParallel2.o
+Object files/libraries should not be included in a source package.
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... NOTE
+Found the following hidden files and directories:
+  .Rhistory
+  ..Rcheck
+  .Rproj.user
+These were most likely included in error. See section ‘Package
+structure’ in the ‘Writing R Extensions’ manual.
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘RDeco’ can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... WARNING
+Non-standard license specification:
+  Undefined
+Standardizable: FALSE
+Checking should be performed on sources prepared by ‘R CMD build’.
+Package listed in more than one of Depends, Imports, Suggests, Enhances:
+  ‘RcppArmadillo’
+A package should be listed in only one of these fields.
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... WARNING
+Found the following directory with the name of a check directory:
+  ./..Rcheck
+Most likely, these were included erroneously.
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking dependencies in R code ... NOTE
+'library' or 'require' call to ‘glmnet’ which was already attached by Depends.
+  Please remove these calls from your code.
+Namespace in Imports field not imported from: ‘RcppArmadillo’
+  All declared Imports should be used.
+Packages in Depends field not imported from:
+  ‘RcppArmadillo’ ‘glmnet’ ‘parallel’
+  These packages need to be imported from (in the NAMESPACE file)
+  for when this namespace is loaded but not attached.
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... NOTE
+DECO_LASSO_MIX: no visible global function definition for ‘mclapply’
+DECO_LASSO_MIX: no visible binding for global variable ‘r’
+DECO_LASSO_MIX : <anonymous>: no visible global function definition for
+  ‘coef’
+DECO_LASSO_MIX : <anonymous>: no visible global function definition for
+  ‘glmnet’
+DECO_LASSO_MIX: no visible global function definition for ‘coef’
+DECO_LASSO_MIX: no visible global function definition for ‘glmnet’
+DECO_LASSO_R: no visible global function definition for ‘mclapply’
+DECO_LASSO_R : <anonymous>: no visible global function definition for
+  ‘coef’
+DECO_LASSO_R : <anonymous>: no visible global function definition for
+  ‘glmnet’
+DECO_LASSO_R: no visible global function definition for ‘coef’
+DECO_LASSO_R: no visible global function definition for ‘glmnet’
+DECO_LASSO_R_CLUSTER: no visible global function definition for
+  ‘mclapply’
+DECO_LASSO_R_CLUSTER : <anonymous>: no visible binding for global
+  variable ‘m’
+DECO_LASSO_R_CLUSTER: no visible global function definition for
+  ‘clusterApplyLB’
+DECO_LASSO_R_CLUSTER : <anonymous>: no visible global function
+  definition for ‘coef’
+DECO_LASSO_R_CLUSTER : <anonymous>: no visible global function
+  definition for ‘glmnet’
+DECO_LASSO_R_CLUSTER: no visible global function definition for ‘coef’
+DECO_LASSO_R_CLUSTER: no visible global function definition for
+  ‘glmnet’
+lassoCoef: no visible global function definition for ‘coef’
+lassoCoef: no visible global function definition for ‘glmnet’
+lassoCoefParallel: no visible global function definition for ‘mclapply’
+lassoCoefParallel : <anonymous>: no visible global function definition
+  for ‘coef’
+lassoCoefParallel : <anonymous>: no visible global function definition
+  for ‘glmnet’
+lassoCoefParallel: no visible binding for global variable ‘ncores’
+Undefined global functions or variables:
+  clusterApplyLB coef glmnet m mclapply ncores r
+Consider adding
+  importFrom("stats", "coef")
+to your NAMESPACE file.
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... WARNING
+Undocumented arguments in documentation object 'DECO_LASSO_C'
+  ‘Y’ ‘X’ ‘p’ ‘n’ ‘lambda’ ‘r’ ‘ncores’ ‘intercept’
+
+Undocumented arguments in documentation object 'lassoCoefParallel'
+  ‘m’
+
+Functions with \usage entries need to have the appropriate \alias
+entries, and all their arguments documented.
+The \usage entries must correspond to syntactically valid R code.
+See chapter ‘Writing R documentation files’ in the ‘Writing R
+Extensions’ manual.
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... WARNING
+'library' or 'require' calls not declared from:
+  ‘expm’ ‘rbenchmark’
+* checking line endings in C/C++/Fortran sources/headers ... OK
+* checking line endings in Makefiles ... OK
+* checking compilation flags in Makevars ... WARNING
+Non-portable flags in variable 'PKG_CXXFLAGS':
+  -fopenmp
+* checking for GNU extensions in Makefiles ... OK
+* checking for portable use of $(BLAS_LIBS) and $(LAPACK_LIBS) ... OK
+* checking compiled code ... NOTE
+File ‘RDeco/libs/RDeco.so’:
+  Found ‘puts’, possibly from ‘printf’ (C), ‘puts’ (C)
+    Object: ‘refinementstep.o’
+
+Compiled code should not call entry points which might terminate R nor
+write to stdout/stderr instead of to the console, nor the system RNG.
+
+See ‘Writing portable packages’ in the ‘Writing R Extensions’ manual.
+* checking files in ‘vignettes’ ... OK
+* checking examples ... OK
+* checking PDF version of manual ... OK
+* DONE
+Status: 6 WARNINGs, 4 NOTEs
