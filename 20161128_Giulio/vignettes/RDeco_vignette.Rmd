@@ -11,27 +11,27 @@ require(RDeco)
 require(rbenchmark)
 ```
 
-## DECO Algorithm
+# DECO Algorithm
 
 DECO Algorithm provides a way to compute Lasso regression coefficients in a parallel and distributed way when $p \gg n$, where $p$ is the number of covariates and $n$ is the number of observations. The algorithm is based on splitting the $n \times p$ matrix $X$ vertically in $m$ submatrices. 
 
-The theoretical fundation behind the algorithm can be found in "DECOrrelated feature space partitioning for distributed sparse regression" papaer by  Wang, Dunson, and Leng (2016).
+The theoretical fundation behind the algorithm can be found in "DECOrrelated feature space partitioning for distributed sparse regression" paper by  Wang, Dunson, and Leng (2016).
 
-## RDeco package
+# RDeco package
 
 \texttt{RDeco} package provides 4 different implementations of the DECO algorithm:
 \begin{itemize}
-\item \texttt{DECO\char`_LASSO\char`_R}: a pure R implementation.
-\item \texttt{DECO\char`_LASSO\char`_MIX}: a mix of R and C++ code.
-\item \texttt{DECO\char`_LASSO\char`_C\char`_PARALLEL}: a pure C++ code.
-\item \texttt{DECO\char`_LASSO\char`_R\char`_CLUSTER}: a pure R implementation for splitting the work load on different machines (still not stable).
+\item \texttt{DECO\char`_LASSO\char`_R}: a pure R implementation;
+\item \texttt{DECO\char`_LASSO\char`_MIX}: a mix of R and C++ implementation;
+\item \texttt{DECO\char`_LASSO\char`_C\char`_PARALLEL}: a pure C++ implementation;
+\item \texttt{DECO\char`_LASSO\char`_R\char`_CLUSTER}: a pure R implementation that splits the work load on different machines (still not stable when $X$ is big).
 \end{itemize}
 
-All four functions currently only accept a fixed penalization parameter $\lambda$ and do not implement an automatic way to tune it. 
+All four functions currently only accept a fixed penalty parameter $\lambda$ and do not implement an automatic way to tune it. 
 
 Given the same dataset and same parameters, the four functions all return the same result:
 
-```{r data, eval=TRUE}
+```{r same_result, eval=TRUE}
 #Generating a simulated dataset
 set.seed(100)
 n<-5
@@ -42,20 +42,23 @@ lambda<-0.03
 r<-0.01
 X<-matrix(rnorm(n*p, sd=1), nrow=n)
 eps<-rnorm(n, mean = 0, sd = sigma)
-activeCoefs<-sample(c(0,1),p, prob=c(0.5, 0.1), replace=TRUE)  ##get coefficients that impact Y
+activeCoefs<-sample(c(0,1),p, prob=c(0.5, 0.1), replace=TRUE) 
 coefs<-activeCoefs*1
 Y<-X%*%coefs + eps
-ncores <- 8
-clust <- makePSOCKcluster(c("greywagtail",
-                             "greyheron",
-                             "greypartridge",
-                             "greyplover"))
-for (refinement in c(FALSE,TRUE)) {
-  res<-DECO_LASSO_R(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r,r_2=0.001, ncores = ncores, refinement = refinement)
-  res_mix<-DECO_LASSO_MIX(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r,r_2=0.001, ncores = ncores, refinement = refinement)
-  res_C<-as.vector(t(DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r,r_2=0.001, ncores = ncores, refinement = refinement)))
-  res_cluster <- DECO_LASSO_R_CLUSTER(Y, X, p=p, n=n, lambda=lambda, r_1=r, r_2=0.001, clust=clust, ncores=ncores, refinement = refinement)
-  if(all.equal(res,res_mix) == TRUE && all.equal(res,res_C) == TRUE && all.equal(res_C,res_cluster) == TRUE) {
+ncores <- 4
+clust <- makePSOCKcluster(c("greywagtail","greyheron","greypartridge","greyplover"))
+for (refinement in c(FALSE,TRUE)) { #Check that the returned value is the same
+  #when the refinement step is performed and when is not.
+  res<-DECO_LASSO_R(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r,r_2=0.001, 
+                    ncores = ncores, refinement = refinement)
+  res_mix<-DECO_LASSO_MIX(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r,r_2=0.001, 
+                          ncores = ncores, refinement = refinement)
+  res_C<-as.vector(t(DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r,
+                                           r_2=0.001, ncores = ncores, refinement = refinement)))
+  res_cluster <- DECO_LASSO_R_CLUSTER(Y, X, p=p, n=n, lambda=lambda, r_1=r, r_2=0.001, 
+                                      clust=clust, ncores=ncores, refinement = refinement)
+  if(all.equal(res,res_mix) == TRUE && all.equal(res,res_C) == TRUE 
+     && all.equal(res_C,res_cluster) == TRUE) {
     print("All functions return the same result!")
   } else {
     print("NOT all functions return the same result...")
@@ -65,11 +68,104 @@ stopCluster(clust)
 
 ```
 
-Since \texttt{DECO\char`_LASSO\char`_C\char`_PARALLEL} function is entirely written in C++, it is faster than both \texttt{DECO\char`_LASSO\char`_MIX} and \texttt{DECO\char`_LASSO\char`_R}.
+# How to perform DECO algorithm: examples and options
 
-## Speed comparison
+## \texttt{DECO\char`_LASSO\char`_R}
 
-```{r data, eval=FALSE}
+```{r deco_lasso_r, eval=FALSE}
+  DECO_LASSO_R(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r,r_2=0.001, ncores = ncores, 
+               refinement = TRUE, intercept=TRUE)
+```
+Note that it is possible to include the intercept in the model by setting \texttt{intercept = TRUE/FALSE} as well as choose if the third stage of DECO algorithm ("refinement step") has to be performed (\texttt{refinement = TRUE/FALSE}). The number of threads used can be specified by setting \texttt{ncores} accordingly, while \texttt{m} indicates the number of submatrices $X_i$.
+
+## \texttt{DECO\char`_LASSO\char`_MIX}
+
+```{r deco_lasso_mix, eval=FALSE}
+  DECO_LASSO_MIX(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r,r_2=0.001, ncores = ncores, 
+               refinement = TRUE, intercept=TRUE)
+```
+
+The input parameters are the same as the ones of \texttt{DECO\char`_LASSO\char`_R} function.
+
+## \texttt{DECO\char`_LASSO\char`_C\char`_PARALLEL}
+
+```{r deco_lasso_parallel, eval=FALSE}
+  DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r,r_2=0.001, ncores = ncores, 
+                        refinement = TRUE, intercept=TRUE, glmnet=TRUE, parallel_glmnet=FALSE)
+```
+
+Lasso coefficients can be computed using R function \texttt{glmnet} or a C++ implementation of the coordinate descent algorithm (still unstable) by setting \texttt{glmnet = TRUE/FALSE}. To use a parallelized version of \texttt{glmnet}, \texttt{parallel\char`_glmnet} must be set to \texttt{TRUE} and it is not generally advised for small datasets, since run time might be slower due to the communication between C++ and R. Coordinate descent algorithm always uses a parallelized version and its input parameter can be tuned by changing \texttt{precision} and \texttt{max\char`_iter} parameters.
+
+Note however that coordinate descent algorithm currently supports only matrices whit $n > p$. The $m$ submatrices should then all have more rows than columns or an error is returned.
+
+## \texttt{DECO\char`_LASSO\char`_R\char`_CLUSTER}
+```{r deco_lasso_cluster, eval=FALSE}
+DECO_LASSO_R_CLUSTER(Y, X, p=p, n=n, lambda=lambda, r_1=r, r_2=0.001, clust=clust, ncores=ncores,
+                     refinement = TRUE, intercept=TRUE)
+```
+
+The input parameters are the same as the ones of \texttt{DECO\char`_LASSO\char`_R} function. \texttt{clust} represents an object obtained, for instance, by \texttt{makePSOCKcluster} function.
+
+# Speed comparison
+
+Since \texttt{DECO\char`_LASSO\char`_C\char`_PARALLEL} function is entirely written in C++, it is faster than both \texttt{DECO\char`_LASSO\char`_MIX} and \texttt{DECO\char`_LASSO\char`_R}. Coordinate descent algorithm is still unstable, so \texttt{glmnet} parameter should be set to \texttt{TRUE}. If the dataset is small, setting \texttt{parallel\char`_glmnet = FALSE} can lead to faster performances.
+
+```{r speed_comparison_small, eval=TRUE}
+#Matrix 5x17; m=4; ncores=4
+for (refinement in c(FALSE,TRUE)) {
+  print(paste("Refinement is set to",refinement))
+  print(benchmark(DECO_LASSO_R(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, 
+                               ncores = ncores, refinement = refinement),
+            DECO_LASSO_MIX(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, 
+                           ncores = ncores, refinement = refinement),
+            DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, 
+                                  ncores = ncores, refinement = refinement),
+            DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, 
+                                  ncores = ncores, refinement = refinement, parallel_glmnet = TRUE),
+            DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, 
+                                  ncores = ncores, refinement = refinement, glmnet = FALSE),
+            replications = 10, order="relative"))
+}
+```
+
+On this example (with $X$ being a $5\times 17$ matrix), \texttt{DECO\char`_LASSO\char`_C\char`_PARALLEL} with \texttt{glmnet = FALSE} is the fastest algorithm since the code is entirely in C++. Note that since the dataset is small, the not parallelized version of \texttt{DECO\char`_LASSO\char`_C\char`_PARALLEL} when \texttt{glmnet = TRUE} is fastest. As predictable, \texttt{DECO\char`_LASSO\char`_R} and \texttt{DECO\char`_LASSO\char`_MIX} functions are significantly slower.
+
+```{r speed_comparison_big, eval=TRUE}
+n<-1000
+p<-10000
+m<-8
+X<-matrix(rnorm(n*p, sd=1), nrow=n)
+eps<-rnorm(n, mean = 0, sd = sigma)
+activeCoefs<-sample(c(0,1),p, prob=c(0.9, 0.1), replace=TRUE)  ##get coefficients that impact Y
+coefs<-activeCoefs*1
+Y<-X%*%coefs + eps
+ncores <- 8
+#Matrix 1000x10000; m=8; ncores=8
+for (refinement in c(FALSE,TRUE)) {
+  print(paste("Refinement is set to",refinement))
+  print(benchmark(DECO_LASSO_R(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, 
+                               ncores = ncores, refinement = refinement),
+            DECO_LASSO_MIX(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, 
+                           ncores = ncores, refinement = refinement),
+            DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, 
+                                  ncores = ncores, refinement = refinement),
+            DECO_LASSO_C_PARALLEL(Y, X, p=p, n=n, m=m, lambda=lambda, r_1=r, 
+                                  ncores = ncores, refinement = refinement, parallel_glmnet = TRUE),
+            replications = 5, order="relative"))
+}
+```
+
+Note that the parallel version of \texttt{glmnet} is now faster.
+
+# Further development and improvement
+\begin{itemize}
+\item \textbf{Stable coordinate descent algorithm}: R function \texttt{glmnet} is exceptionally fast, but the communication between C++ and R slows down the computation. A stable C++ function to compute the Lasso regression coefficients would solve this problem.
+\item \textbf{Adaptive penalty}: following the original paper, a modification of BIC could be used to automatically tune the penalty $\lambda$.
+\item \textbf{Chunkwise access to the matrix}: \texttt{DECO\char`_LASSO\char`_R\char`_CLUSTER} is an (initial) implementation of the algorithm to distribute the work load on several machines. This becomes necessary when the matrix $X$ is too big to be stored in the RAM and it should then be accessed chunkwise. 
+\end{itemize}
+
+
+```{r data, eval=FALSE, echo=FALSE}
 set.seed(100)
 n<-5
 p<-17
