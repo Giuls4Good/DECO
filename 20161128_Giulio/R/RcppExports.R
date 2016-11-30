@@ -160,7 +160,9 @@ DECO_LASSO_C <- function(Y, X, p, n, lambda, r, ncores = 1L, intercept = TRUE) {
 
 #' DECO Parallelized Algorithm (Pure C++)
 #'
-#' A description goes here
+#' The algorithm is based on the description in "DECOrrelated feature space partitioning
+#' for distributed sparse regression" in Wang, Dunson, and Leng (2016) if lambda is fixed and
+#' LASSO is used as the penalized regression scheme.
 #'
 #' @param Y gives the nx1 vector of observations we wish to approximate with a linear model of type Y = Xb + e
 #' @param X gives the nxp matrix of regressors, each column corresponding to a different regressor
@@ -175,7 +177,7 @@ DECO_LASSO_C <- function(Y, X, p, n, lambda, r, ncores = 1L, intercept = TRUE) {
 #' @param r_2 is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I)
 #' @param intercept determines whether to include an intercept in the model or not
 #' @param refinement determines whether to include the refinement step (Stage 3 of the algorithm)
-#' @param parallel_lasso determines whether a parallel version of the Lasso coefficients should be used.
+#' @param parallel_glmnet determines whether a parallel version of the Lasso coefficients should be used.
 #' This parameter is ignored when \code{glmnet} is set to \code{FALSE} (see details).
 #' @param glmnet determines whether glmnet function form glmnet R package should be used to compute the Lasso coefficients.
 #' See details for further information. If set to \code{FALSE}, C++ implementation of coordinate descent algorithm is used.
@@ -183,21 +185,21 @@ DECO_LASSO_C <- function(Y, X, p, n, lambda, r, ncores = 1L, intercept = TRUE) {
 #' \code{glmnet} is set to \code{TRUE}.
 #' @param max_iter determines the maximum number of iterations used in the coordinate descent algorithm.
 #' It is ignored when \code{glmnet} is set to \code{TRUE}.
-#' @details This function is a pure C++ implementation of \code{DECO_LASSO_R} and \code{DECO_LASSO_MIX} functions.
+#' @details This function is a C++ implementation of \code{DECO_LASSO_R} and \code{DECO_LASSO_MIX} functions.
 #' Due to the fact that it is entirely written in C++ is generally way faster than its counterparts.
 #'
 #' Two functions can be used to compute Lasso coefficients: glmnet R function (\code{glmnet = TRUE})
 #' and coordinate descent algorithm (\code{glmnet = FALSE}). glmnet R function is generally faster, but more memory is
-#' required to pass the input argumentd from C++ to R and back. When \code{parallel_lasso = TRUE} an R parallelized
+#' required to pass the input argumentd from C++ to R and back. When \code{parallel_glmnet = TRUE} an R parallelized
 #' version of glmnet is used. Note however that for small datasets this could lead to slower run times, due to the
 #' communication between C++ and R.
 #'
-#' Descent coordinate algorithm is always run on a single core.
+#' Descent coordinate algorithm is always run in a parallel way (using \code{ncores} threads).
 #'
 #' @return An estimate of the coefficients b.
 #' @author Samuel Davenport, Jack Carter, Giulio Morina, Jeremias Knoblauch
 #' @export
-DECO_LASSO_C_PARALLEL <- function(Y, X, p, n, m, lambda, r_1, r_2 = 0.01, ncores = 1L, intercept = TRUE, refinement = TRUE, parallel_lasso = FALSE, glmnet = TRUE, precision = 0.0000001, max_iter = 100000L) {
-    .Call('RDeco_DECO_LASSO_C_PARALLEL', PACKAGE = 'RDeco', Y, X, p, n, m, lambda, r_1, r_2, ncores, intercept, refinement, parallel_lasso, glmnet, precision, max_iter)
+DECO_LASSO_C_PARALLEL <- function(Y, X, p, n, m, lambda, r_1, r_2 = 0.01, ncores = 1L, intercept = TRUE, refinement = TRUE, glmnet = TRUE, parallel_glmnet = FALSE, precision = 0.0000001, max_iter = 100000L) {
+    .Call('RDeco_DECO_LASSO_C_PARALLEL', PACKAGE = 'RDeco', Y, X, p, n, m, lambda, r_1, r_2, ncores, intercept, refinement, glmnet, parallel_glmnet, precision, max_iter)
 }
 

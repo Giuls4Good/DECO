@@ -30,7 +30,7 @@ using namespace Rcpp;
 //' @param r_2 is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I)
 //' @param intercept determines whether to include an intercept in the model or not
 //' @param refinement determines whether to include the refinement step (Stage 3 of the algorithm)
-//' @param parallel_lasso determines whether a parallel version of the Lasso coefficients should be used.
+//' @param parallel_glmnet determines whether a parallel version of the Lasso coefficients should be used.
 //' This parameter is ignored when \code{glmnet} is set to \code{FALSE} (see details).
 //' @param glmnet determines whether glmnet function form glmnet R package should be used to compute the Lasso coefficients.
 //' See details for further information. If set to \code{FALSE}, C++ implementation of coordinate descent algorithm is used.
@@ -43,7 +43,7 @@ using namespace Rcpp;
 //'
 //' Two functions can be used to compute Lasso coefficients: glmnet R function (\code{glmnet = TRUE})
 //' and coordinate descent algorithm (\code{glmnet = FALSE}). glmnet R function is generally faster, but more memory is
-//' required to pass the input argumentd from C++ to R and back. When \code{parallel_lasso = TRUE} an R parallelized
+//' required to pass the input argumentd from C++ to R and back. When \code{parallel_glmnet = TRUE} an R parallelized
 //' version of glmnet is used. Note however that for small datasets this could lead to slower run times, due to the
 //' communication between C++ and R.
 //'
@@ -54,8 +54,8 @@ using namespace Rcpp;
 //' @export
 // [[Rcpp::export]]
 arma::mat DECO_LASSO_C_PARALLEL(arma::vec& Y, arma::mat& X, int p, int n, int m, float lambda, float r_1, float r_2=0.01,
-                        int ncores = 1, bool intercept = true, bool refinement = true, bool parallel_lasso = false,
-                        bool glmnet = true, double precision = 0.0000001, int max_iter = 100000) {
+                        int ncores = 1, bool intercept = true, bool refinement = true,
+                        bool glmnet = true,bool parallel_glmnet = false, double precision = 0.0000001, int max_iter = 100000) {
   // STEP 0: INITIALIZATION OF VARIABLES
   /*
    * Y_stand will contain the standardized version of Y (mean(Y_stand) = 0). The original Y is still used to compute the intercept
@@ -71,8 +71,8 @@ arma::mat DECO_LASSO_C_PARALLEL(arma::vec& Y, arma::mat& X, int p, int n, int m,
    * X_new is an array of matrices of length equal to m. Its element are the product between the decorrelation
    * matrix XX and each elements of Xi
    */
-  arma::mat Y_stand, X_stand(X), mean_col(mean(X,0)), XX;
-  arma::vec Y_new, coef0, coefs;
+  arma::mat X_stand(X), mean_col(mean(X,0)), XX;
+  arma::vec Y_stand, Y_new, coef0, coefs;
   arma::mat *Xi = new arma::mat[m]; //REMEMBER to delete it after use!!
   arma::mat *XiXi_list = new arma::mat[m]; //REMEMBER to delete it after use!!
   arma::mat *X_new = new arma::mat[m]; //REMEMBER to delete it after use!!
@@ -139,13 +139,13 @@ arma::mat DECO_LASSO_C_PARALLEL(arma::vec& Y, arma::mat& X, int p, int n, int m,
 
   // STEP 3.1 LASSO for coefs on each partition i
   /*
-   * If glmnet = true, parallel_lasso = true -> R glmnet function in a parallel way is used
-   * If glmnet = true, parallel_lasso = false -> R glmnet function on a single core is used
+   * If glmnet = true, parallel_glmnet = true -> R glmnet function in a parallel way is used
+   * If glmnet = true, parallel_glmnet = false -> R glmnet function on a single core is used
    * If glmnet = false -> C++ gradient descent algorithm is used in a parallel way
    */
   if(glmnet) {
     Environment RDeco("package:RDeco"); //Get the environment defined by our package RDeco
-    if(parallel_lasso) {
+    if(parallel_glmnet) {
       Function lassoCoefParallel = RDeco["lassoCoefParallel"]; //Get the R function that computes the Lasso
       //coefficients in a parallel way
       coefs = lassoRCoefParallel(X_new,Y_new,1.0,2*lambda,false,m,lassoCoefParallel); //Call the C++ function
@@ -181,7 +181,10 @@ arma::mat DECO_LASSO_C_PARALLEL(arma::vec& Y, arma::mat& X, int p, int n, int m,
 
   //  STEP 4: REFINEMENT
   if(refinement) {
-    Rcpp::warning("Sorry, refinement step is still not implemented");
+    coefs = refine(Y_stand, X_stand, coefs, intercept, r_2, n, p, lambda);
+  }
+  else if(intercept) {
+
   }
   return(coefs);
 }

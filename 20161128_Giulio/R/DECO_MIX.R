@@ -134,17 +134,26 @@ DECO_LASSO_MIX <- function(Y, X, p=NULL, n=NULL, m=1, lambda, r_1, r_2 = r_1, nc
     }
 
     #**   STEP 4.1 Check if n<=#nonzero coefs and perform LASSO if so **#
-    M = which(coefs != 0)
+    M = which(abs(coefs) > 0.001 )
+    X_M = X[,M]
     if(length(M) >= n){
-      coefs[M] <- coef(glmnet(X[, M], Y, nlambda = 1, lambda = c(lambda), intercept = FALSE))[-1]
+      coefs[M] = coef(glmnet(X_M, Y_stand, alpha = 1, nlambda = 1, lambda = 2*lambda, intercept = FALSE))[-1]
+
+      M_new = which( abs(coefs[M]) > 0.001 )
+      X_M = X_M[,M_new]
+
+      #This can potentially be made faster by doing: M = intersect(M,M_new) or something of this sort! Probably not the bottleneck though
+      M = which(abs(coefs) > 0.001 )
+    }
+
+    if(length(M) == 0){
+      print("All coefficients estimated as 0")
+      return(rep(0, length(coefs)))
     }
     #**   STEP 4.2 Run Ridge regression on all non-zero coef vars     **#
-    #Find the indicies of the coefficients that are non-zero
-    M = which(coefs != 0);
-    #Subset X
-    X_M = X[, M]
+
     #Apply Ridge Regression to give an updated and hopefully better estimate of the coefficient vector
-    coefs[M] = invSymmMatrix(t(X_M) %*% X_M + r_2 * diag(length(M))) %*% t(X_M) %*% Y
+    coefs[M] = solve(t(X_M) %*% X_M + r_2 * diag(length(M))) %*% t(X_M) %*% Y_stand
   }
 
   return(coefs)

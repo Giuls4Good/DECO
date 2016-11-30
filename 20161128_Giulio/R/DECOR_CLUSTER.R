@@ -1,3 +1,30 @@
+#' DECO Clusterized Algorithm (Pure R)
+#'
+#' @param Y gives the nx1 vector of observations we wish to approximate with a linear model of type Y = Xb + e
+#' @param X gives the nxp matrix of regressors, each column corresponding to a different regressor
+#' @param p is the column dimension of X [equivalently, p is the number of regressor variables].
+#' If not given, it is computed as the number of columns of X.
+#' @param n is the row dimension of X (and Y) [equivalently, n is the number of observations/individuals]
+#' If not given, it is computed as the number of rows of X.
+#' @param lambda gives the (fixed) penalty magnitude in the LASSO fit of the algorithm
+#' @param r_1 is a tweaking parameter for making the inverse more robust (as we take inverse of XX + r_1*I)
+#' @param clust an object obtained by \code{makePSOCKcluster}
+#' @param r_2 is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I)
+#' @param ncores determines the number of cores used on each machine to parallelize computation
+#' @param intercept determines whether to include an intercept in the model or not
+#' @param refinement determines whether to include the refinement step (Stage 3 of the algorithm)
+#' @author Samuel Davenport, Jack Carter, Giulio Morina, Jeremias Knoblauch
+#' @details The algorithm is based on the description in "DECOrrelated feature space partitioning
+#'          for distributed sparse regression" in Wang, Dunson, and Leng (2016) if lambda is fixed and
+#'          LASSO is used as the penalized regression scheme. The rotated versions of Y and X the authors denote
+#'          with Tilde are denoted as X* and Y* in the comments below
+#' @note -This implementation uses only R functions.
+#'
+#' - This implementation is meant to distribute the load of work to several machines. Note that the current implementation
+#' does not deal with the problem of storing big matrices; this function is just the starting step and it should be
+#' further developed (i.e. reading the matrix chunckwise from a file, C++ implementation,parallelizing on each
+#' machine,...).
+#' @export
 DECO_LASSO_R_CLUSTER <- function(Y, X, p, n, lambda, r_1, clust, r_2 = r_1, ncores=1, intercept=TRUE, refinement = TRUE){
   #***  STEP 1: INITIALIZATION  ***#
   nclusters <- length(clust)
@@ -16,14 +43,19 @@ DECO_LASSO_R_CLUSTER <- function(Y, X, p, n, lambda, r_1, clust, r_2 = r_1, ncor
   #DO NOT USE THIS
   Xi <- mclapply(1:nclusters,
                  function(i){
-                   startGroup <- as.integer(round((p/nclusters)*(i-1))) + 1  #start one position advanced to last endGroup computed
-                   endGroup <- as.integer(min(p, round((p/nclusters)*i)))    #make sure you don't have index>vectorsize
+                   startGroup <- floor(p/m)*(i-1) + 1
+                   if(i < m) {
+                     endGroup <- floor(p/m)*i
+                   } else {
+                     endGroup <- p
+                   }
                    return( X[,startGroup:endGroup])
                  }, mc.cores=ncores
   )                                                     #Note: matrix(unlist(Partitions), ncol=p) = X
 
   #**   STEP 1.3 Distribution on cores        **#
   #Only relevant in implementations that actually load the data into different machines
+
   XiXi_list <- clusterApplyLB(clust, Xi, function(X) {return(X%*%t(X))})
 
   #**   STEP 2.2 Compute X'X from X(i)'X(i)         **#
@@ -79,14 +111,26 @@ DECO_LASSO_R_CLUSTER <- function(Y, X, p, n, lambda, r_1, clust, r_2 = r_1, ncor
     }
 
     #**   STEP 4.1 Check if n<=#nonzero coefs and perform LASSO if so **#
-
-    #**   STEP 4.2 Run Ridge regression on all non-zero coef vars     **#
-    #Find the indicies of the coefficients that are non-zero
-    M = which(coefs != 0);
-    #Subset X
+    M = which(abs(coefs) > 0.001 )
     X_M = X[,M]
+    if(length(M) >= n){
+      coefs[M] = coef(glmnet(X_M, Y_stand, alpha = 1, nlambda = 1, lambda = 2*lambda, intercept = FALSE))[-1]
+
+      M_new = which( abs(coefs[M]) > 0.001 )
+      X_M = X_M[,M_new]
+
+      #This can potentially be made faster by doing: M = intersect(M,M_new) or something of this sort! Probably not the bottleneck though
+      M = which(abs(coefs) > 0.001 )
+    }
+
+    if(length(M) == 0){
+      print("All coefficients estimated as 0")
+      return(rep(0, length(coefs)))
+    }
+    #**   STEP 4.2 Run Ridge regression on all non-zero coef vars     **#
+
     #Apply Ridge Regression to give an updated and hopefully better estimate of the coefficient vector
-    coefs[M] = solve(t(X_M)%*%X_M + r_2*diag(length(M)))%*% t(X_M) %*% Y
+    coefs[M] = solve(t(X_M) %*% X_M + r_2 * diag(length(M))) %*% t(X_M) %*% Y_stand
   }
 
   return(coefs)

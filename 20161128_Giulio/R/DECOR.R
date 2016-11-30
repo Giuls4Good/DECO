@@ -58,7 +58,7 @@ DECO_LASSO_R <- function(Y, X, p = NULL, n = NULL, m = 1, lambda, r_1, r_2 = r_1
   }
 
   #**   STEP 1.1 Mean Standardization         **#
-  Y <- as.vector(Y - mean(Y));
+  Y_stand <- as.vector(Y - mean(Y));
   X <- scale(X, scale = FALSE)[ , ] #Do not divide by standard deviation, just puts mean equal 0
 
   #**   STEP 1.2 Arbitrary Partitioning       **#
@@ -101,7 +101,7 @@ DECO_LASSO_R <- function(Y, X, p = NULL, n = NULL, m = 1, lambda, r_1, r_2 = r_1
 
 
   #**   STEP 2.4 Compute Y* and X*(i) for each i    **#
-  Y <- XX_Inverse_Sqrt%*%Y
+  Y <- XX_Inverse_Sqrt%*%Y_stand
   Xi2 <- mclapply(1:m,
                 function(i){
                   return(XX_Inverse_Sqrt%*%(Xi[[i]]))        #Compute XX_Inverse_Sqrt%*%Xi for all i
@@ -129,24 +129,50 @@ DECO_LASSO_R <- function(Y, X, p = NULL, n = NULL, m = 1, lambda, r_1, r_2 = r_1
 
   #***  STEP 4: REFINEMENT      ***#
   if (refinement){
-
     if(intercept){
       #Update the X matrix to inlcude a column for the intercept
       X = cbind(rep(1,n),X)
     }
 
     #**   STEP 4.1 Check if n<=#nonzero coefs and perform LASSO if so **#
-    M = which(coefs != 0)
-    if(M >= n){
-      coefs[M] <- coef(glmnet(X[, M], Y, nlambda = 1, lambda = c(lambda), intercept = FALSE))[-1]
+    M = which(abs(coefs) > 0.001 )
+    X_M = X[,M]
+    if(length(M) >= n){
+      coefs[M] = coef(glmnet(X_M, Y_stand, alpha = 1, nlambda = 1, lambda = 2*lambda, intercept = FALSE))[-1]
+
+      M_new = which( abs(coefs[M]) > 0.001 )
+      X_M = X_M[,M_new]
+
+      #This can potentially be made faster by doing: M = intersect(M,M_new) or something of this sort! Probably not the bottleneck though
+      M = which(abs(coefs) > 0.001 )
+    }
+
+    if(length(M) == 0){
+      print("All coefficients estimated as 0")
+      return(rep(0, length(coefs)))
     }
     #**   STEP 4.2 Run Ridge regression on all non-zero coef vars     **#
-    #Find the indicies of the coefficients that are non-zero
-    M = which(coefs != 0);
-    #Subset X
-    X_M = X[, M]
+
     #Apply Ridge Regression to give an updated and hopefully better estimate of the coefficient vector
-    coefs[M] = solve(t(X_M) %*% X_M + r_2 * diag(length(M))) %*% t(X_M) %*% Y
+    coefs[M] = solve(t(X_M) %*% X_M + r_2 * diag(length(M))) %*% t(X_M) %*% Y_stand
+
+    # if(intercept){
+    #   #Update the X matrix to inlcude a column for the intercept
+    #   X = cbind(rep(1,n),X)
+    # }
+    #
+    # #**   STEP 4.1 Check if n<=#nonzero coefs and perform LASSO if so **#
+    # M = which(coefs != 0)
+    # if(length(M) >= n){
+    #   coefs[M] <- coef(glmnet(X[, M], Y, nlambda = 1, lambda = c(lambda), intercept = FALSE))[-1]
+    # }
+    # #**   STEP 4.2 Run Ridge regression on all non-zero coef vars     **#
+    # #Find the indicies of the coefficients that are non-zero
+    # M = which(coefs != 0);
+    # #Subset X
+    # X_M = X[, M]
+    # #Apply Ridge Regression to give an updated and hopefully better estimate of the coefficient vector
+    # coefs[M] = solve(t(X_M) %*% X_M + r_2 * diag(length(M))) %*% t(X_M) %*% Y
   }
 
   return(coefs)

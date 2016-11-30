@@ -2,7 +2,11 @@ Package: RDeco
 Type: Package
 Title: Clusterized and parallelized implmentation of DECO algorithm
 Version: 0.1.0
-Author: J. Carter, S. Davenport, J. Knoblauch, G. Morina
+Author@R: c(person("Jack", "Carter",email = "jack.carter@spc.ox.ac.uk",
+    role=c(aut,cre),person("Sam", "Davenport",email = "sam.davenport@spc.ox.ac.uk",
+    role=c(aut,cre),person("Jeremias", "Knoblauch",email = "jeremias.knoblauch@spc.ox.ac.uk",
+    role=c(aut,cre),person("Giulio", "Morina",email = "giulio.morina@spc.ox.ac.uk",
+    role=c(aut,cre)))
 Description: The package provides methods to run the DECO algorithm as described in "DECOrrelated feature space partitioning
   for distributed sparse regression" in Wang, Dunson, and Leng (2016).
 License: Undefined

@@ -123,8 +123,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // DECO_LASSO_C_PARALLEL
-arma::mat DECO_LASSO_C_PARALLEL(arma::vec& Y, arma::mat& X, int p, int n, int m, float lambda, float r_1, float r_2, int ncores, bool intercept, bool refinement, bool parallel_lasso, bool glmnet, double precision, int max_iter);
-RcppExport SEXP RDeco_DECO_LASSO_C_PARALLEL(SEXP YSEXP, SEXP XSEXP, SEXP pSEXP, SEXP nSEXP, SEXP mSEXP, SEXP lambdaSEXP, SEXP r_1SEXP, SEXP r_2SEXP, SEXP ncoresSEXP, SEXP interceptSEXP, SEXP refinementSEXP, SEXP parallel_lassoSEXP, SEXP glmnetSEXP, SEXP precisionSEXP, SEXP max_iterSEXP) {
+arma::mat DECO_LASSO_C_PARALLEL(arma::vec& Y, arma::mat& X, int p, int n, int m, float lambda, float r_1, float r_2, int ncores, bool intercept, bool refinement, bool glmnet, bool parallel_glmnet, double precision, int max_iter);
+RcppExport SEXP RDeco_DECO_LASSO_C_PARALLEL(SEXP YSEXP, SEXP XSEXP, SEXP pSEXP, SEXP nSEXP, SEXP mSEXP, SEXP lambdaSEXP, SEXP r_1SEXP, SEXP r_2SEXP, SEXP ncoresSEXP, SEXP interceptSEXP, SEXP refinementSEXP, SEXP glmnetSEXP, SEXP parallel_glmnetSEXP, SEXP precisionSEXP, SEXP max_iterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -139,11 +139,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
     Rcpp::traits::input_parameter< bool >::type intercept(interceptSEXP);
     Rcpp::traits::input_parameter< bool >::type refinement(refinementSEXP);
-    Rcpp::traits::input_parameter< bool >::type parallel_lasso(parallel_lassoSEXP);
     Rcpp::traits::input_parameter< bool >::type glmnet(glmnetSEXP);
+    Rcpp::traits::input_parameter< bool >::type parallel_glmnet(parallel_glmnetSEXP);
     Rcpp::traits::input_parameter< double >::type precision(precisionSEXP);
     Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
-    rcpp_result_gen = Rcpp::wrap(DECO_LASSO_C_PARALLEL(Y, X, p, n, m, lambda, r_1, r_2, ncores, intercept, refinement, parallel_lasso, glmnet, precision, max_iter));
+    rcpp_result_gen = Rcpp::wrap(DECO_LASSO_C_PARALLEL(Y, X, p, n, m, lambda, r_1, r_2, ncores, intercept, refinement, glmnet, parallel_glmnet, precision, max_iter));
     return rcpp_result_gen;
 END_RCPP
 }
