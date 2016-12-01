@@ -1,7 +1,6 @@
 * installing *source* package ‘RDeco’ ...
 ** libs
 make: Nothing to be done for 'all'.
-make: 'symbols.rds' is up to date.
 installing to /data/tropicbird/morina/Large_Data/DECO/RDeco_Final.Rcheck/RDeco/libs
 ** R
 ** preparing package for lazy loading

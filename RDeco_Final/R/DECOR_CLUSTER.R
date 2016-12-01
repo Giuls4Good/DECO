@@ -3,14 +3,12 @@
 #' @param Y gives the nx1 vector of observations we wish to approximate with a linear model of type Y = Xb + e
 #' @param X gives the nxp matrix of regressors, each column corresponding to a different regressor
 #' @param p is the column dimension of X [equivalently, p is the number of regressor variables].
-#' If not given, it is computed as the number of columns of X.
-#' @param n is the row dimension of X (and Y) [equivalently, n is the number of observations/individuals]
-#' If not given, it is computed as the number of rows of X.
+#' @param n is the row dimension of X (and Y) [equivalently, n is the number of observations/individuals].
 #' @param lambda gives the (fixed) penalty magnitude in the LASSO fit of the algorithm
 #' @param r_1 is a tweaking parameter for making the inverse more robust (as we take inverse of XX + r_1*I)
 #' @param clust an object obtained by \code{makePSOCKcluster}
 #' @param r_2 is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I)
-#' @param ncores determines the number of cores used on each machine to parallelize computation
+#' @param ncores determines the number of threads used on each machine to parallelize computation
 #' @param intercept determines whether to include an intercept in the model or not
 #' @param refinement determines whether to include the refinement step (Stage 3 of the algorithm)
 #' @author Samuel Davenport, Jack Carter, Giulio Morina, Jeremias Knoblauch

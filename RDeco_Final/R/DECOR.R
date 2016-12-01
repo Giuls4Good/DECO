@@ -11,7 +11,7 @@
 #' If not given, it is computed as the number of rows of X.
 #' @param m is the number of groups/blocks you wish to split X into, denoted X(i) for 1 <= i <= m.
 #' @param lambda gives the (fixed) penalty magnitude in the LASSO fit of the algorithm.
-#' @param ncores determines the number of cores used on each machine to parallelize computation.
+#' @param ncores determines the number of threads used on each machine to parallelize computation.
 #' @param r_1 is a tweaking parameter for making the inverse more robust (as we take inverse of XX + r_1*I).
 #' @param r_2 is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I).
 #' @param intercept determines whether to include an intercept in the model or not.

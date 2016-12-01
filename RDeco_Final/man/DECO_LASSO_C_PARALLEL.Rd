@@ -13,11 +13,9 @@ DECO_LASSO_C_PARALLEL(Y, X, p, n, m, lambda, r_1, r_2 = 0.01, ncores = 1L,
 
 \item{X}{gives the nxp matrix of regressors, each column corresponding to a different regressor.}
 
-\item{p}{is the column dimension of X [equivalently, p is the number of regressor variables].
-If not given, it is computed as the number of columns of X.}
+\item{p}{is the column dimension of X [equivalently, p is the number of regressor variables].}
 
-\item{n}{is the row dimension of X (and Y) [equivalently, n is the number of observations/individuals].
-If not specified, it is computed as the number of rows of X.}
+\item{n}{is the row dimension of X (and Y) [equivalently, n is the number of observations/individuals].}
 
 \item{m}{is the number of groups/blocks you wish to split X into, denoted X(i) for 1 <= i <= m.}
 
@@ -27,13 +25,13 @@ If not specified, it is computed as the number of rows of X.}
 
 \item{r_2}{is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I).}
 
-\item{ncores}{determines the number of cores used on each machine to parallelize computation.}
+\item{ncores}{determines the number of threads used on each machine to parallelize computation.}
 
 \item{intercept}{determines whether to include an intercept in the model or not.}
 
 \item{refinement}{determines whether to include the refinement step (Stage 3 of the algorithm).}
 
-\item{glmnet}{determines whether glmnet function form glmnet R package should be used to compute the Lasso coefficients.
+\item{glmnet}{determines whether \code{glmnet} function form \code{glmnet} R package should be used to compute the Lasso coefficients.
 See details for further information. If set to \code{FALSE}, C++ implementation of coordinate descent algorithm is used.}
 
 \item{parallel_glmnet}{determines whether a parallel version of the Lasso coefficients should be used.
@@ -57,10 +55,10 @@ regression scehme.
 This function is a C++ implementation of \code{DECO_LASSO_R} and \code{DECO_LASSO_MIX} functions.
 Due to the fact that it is entirely written in C++ it runs faster than the corresponding R implementations for sufficiently large matrices.
 
-Two functions can be used to compute Lasso coefficients: glmnet R function (\code{glmnet = TRUE}).
-and coordinate descent algorithm (\code{glmnet = FALSE}). glmnet R function is generally faster, but more memory is
+Two functions can be used to compute Lasso coefficients: \code{glmnet} R function (\code{glmnet = TRUE}).
+and coordinate descent algorithm (\code{glmnet = FALSE}). \code{glmnet} R function is generally faster, but more memory is
 required to pass the input argumentd from C++ to R and back. When \code{parallel_glmnet = TRUE} an R parallelized
-version of glmnet is used. Note however that for small datasets this could lead to slower run times, due to the
+version of \code{glmnet} is used. Note however that for small datasets this could lead to slower run times, due to the
 communication between C++ and R.
 
 Descent coordinate algorithm is always run in a parallel way (using \code{ncores} threads).

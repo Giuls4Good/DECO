@@ -12,11 +12,9 @@ DECO_LASSO_R_CLUSTER(Y, X, p, n, lambda, r_1, clust, r_2 = r_1, ncores = 1,
 
 \item{X}{gives the nxp matrix of regressors, each column corresponding to a different regressor}
 
-\item{p}{is the column dimension of X [equivalently, p is the number of regressor variables].
-If not given, it is computed as the number of columns of X.}
+\item{p}{is the column dimension of X [equivalently, p is the number of regressor variables].}
 
-\item{n}{is the row dimension of X (and Y) [equivalently, n is the number of observations/individuals]
-If not given, it is computed as the number of rows of X.}
+\item{n}{is the row dimension of X (and Y) [equivalently, n is the number of observations/individuals].}
 
 \item{lambda}{gives the (fixed) penalty magnitude in the LASSO fit of the algorithm}
 
@@ -26,7 +24,7 @@ If not given, it is computed as the number of rows of X.}
 
 \item{r_2}{is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I)}
 
-\item{ncores}{determines the number of cores used on each machine to parallelize computation}
+\item{ncores}{determines the number of threads used on each machine to parallelize computation}
 
 \item{intercept}{determines whether to include an intercept in the model or not}
 

@@ -3,17 +3,17 @@ using namespace Rcpp;
 using namespace arma;
 #include "deco.h"
 
-//' Implement the refinement step in C++
-//'
-//' @param Y
-//' @param X
-//' @param coefs vector of estimated coefficients to be refined
-//' @param intercept a parameter that if TRUE includes an intercept
-//' @param r_2 a parameter that allows for matrix inversion to take place
-//' @param n
-//' @param p
-//' @param lambda is the parameter in the lasso computations
-//' @return coefs updated by the ridge regression
+// Implement the refinement step in C++
+//
+// @param Y
+// @param X
+// @param coefs vector of estimated coefficients to be refined
+// @param intercept a parameter that if TRUE includes an intercept
+// @param r_2 a parameter that allows for matrix inversion to take place
+// @param n
+// @param p
+// @param lambda is the parameter in the lasso computations
+// @return coefs updated by the ridge regression
 arma::vec refine(arma::vec &Y, arma::mat &X, arma::vec coefs, bool intercept, float r_2, int n, int p, float lambda){
   if(intercept){
     /*

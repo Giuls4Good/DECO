@@ -38,13 +38,13 @@ arma::vec lassoRCoefParallel(arma::mat* X, arma::vec& Y, double nlambda,
   return res_arm;
 }
 
-//' DECO Parallelized Algorithm (Pure C)
-//'
-//' This function is deprecated. Use \code{DECO_LASSO_C_PARALLEL} function.
-//'
-//' @details This function is equivalent to \code{DECO_LASSO_C_PARALLEL} function when fixing \code{m=1, ncores=1}.
-//'
-//' @export
+// DECO Parallelized Algorithm (Pure C)
+//
+// This function is deprecated. Use \code{DECO_LASSO_C_PARALLEL} function.
+//
+// @details This function is equivalent to \code{DECO_LASSO_C_PARALLEL} function when fixing \code{m=1, ncores=1}.
+//
+// @export
 // [[Rcpp::export]]
 arma::mat DECO_LASSO_C(arma::vec Y, arma::mat X, int p, int n, float lambda, float r,
                        int ncores = 1, bool intercept = true) {

@@ -114,24 +114,18 @@ to your NAMESPACE file.
 * checking Rd files ... OK
 * checking Rd metadata ... OK
 * checking Rd cross-references ... OK
-* checking for missing documentation entries ... OK
-* checking for code/documentation mismatches ... OK
-* checking Rd \usage sections ... WARNING
-Undocumented arguments in documentation object 'DECO_LASSO_C'
-  ‘Y’ ‘X’ ‘p’ ‘n’ ‘lambda’ ‘r’ ‘ncores’ ‘intercept’
-
-Undocumented arguments in documentation object 'lassoCoefParallel'
-  ‘m’
-
-Functions with \usage entries need to have the appropriate \alias
-entries, and all their arguments documented.
-The \usage entries must correspond to syntactically valid R code.
+* checking for missing documentation entries ... WARNING
+Undocumented code objects:
+  ‘DECO_LASSO_C’ ‘invSymmMatrix’ ‘lassoCoef’ ‘lassoCoefParallel’
+  ‘mulMatrices’ ‘squareRootSymmetric’ ‘standardizeMatrix’
+  ‘standardizeVector’ ‘tMatrix’
+All user-level objects in a package should have documentation entries.
 See chapter ‘Writing R documentation files’ in the ‘Writing R
 Extensions’ manual.
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
 * checking Rd contents ... OK
-* checking for unstated dependencies in examples ... WARNING
-'library' or 'require' calls not declared from:
-  ‘expm’ ‘rbenchmark’
+* checking for unstated dependencies in examples ... OK
 * checking line endings in C/C++/Fortran sources/headers ... OK
 * checking line endings in Makefiles ... OK
 * checking compilation flags in Makevars ... WARNING
@@ -149,7 +143,7 @@ write to stdout/stderr instead of to the console, nor the system RNG.
 
 See ‘Writing portable packages’ in the ‘Writing R Extensions’ manual.
 * checking files in ‘vignettes’ ... OK
-* checking examples ... OK
+* checking examples ... NONE
 * checking PDF version of manual ... OK
 * DONE
-Status: 6 WARNINGs, 4 NOTEs
+Status: 5 WARNINGs, 4 NOTEs

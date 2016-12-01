@@ -26,7 +26,7 @@ If not given, it is computed as the number of rows of X.}
 
 \item{r_2}{is a tweaking parameter for making the inverse more robust (as we take inverse of X_MX_M + r_2*I).}
 
-\item{ncores}{determines the number of cores used on each machine to parallelize computation.}
+\item{ncores}{determines the number of threads used on each machine to parallelize computation.}
 
 \item{intercept}{determines whether to include an intercept in the model or not.}
 
